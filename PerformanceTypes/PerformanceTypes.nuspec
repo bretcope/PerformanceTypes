@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>PerformanceTypes</title>
+    <authors>Bret Copeland</authors>
+    <owners>Bret Copeland</owners>
+    <projectUrl>https://github.com/bretcope/PerformanceTypes</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>Performance Allocations Stopwatch</tags>
+  </metadata>
+</package>
