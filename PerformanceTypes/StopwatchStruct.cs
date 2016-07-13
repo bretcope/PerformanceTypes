@@ -6,8 +6,8 @@ namespace PerformanceTypes
 {
     public struct StopwatchStruct
     {
-        private long _startTimestamp;
-        private long _elapsed;
+        long _startTimestamp;
+        long _elapsed;
 
         public bool IsRunning { get; private set; }
 
@@ -48,7 +48,7 @@ namespace PerformanceTypes
 
         public double GetElapsedMilliseconds()
         {
-            return (double)ElapsedTicks / TicksPerMillisecond;
+            return (double)ElapsedTicks / TICKS_PER_MILLISECOND;
         }
 
         /****************************************************************************************
@@ -57,8 +57,8 @@ namespace PerformanceTypes
         *
         ****************************************************************************************/
 
-        private const long TicksPerMillisecond = 10000;
-        private const long TicksPerSecond = TicksPerMillisecond * 1000;
+        const long TICKS_PER_MILLISECOND = 10000;
+        const long TICKS_PER_SECOND = TICKS_PER_MILLISECOND * 1000;
 
         public static readonly bool IsHighResolution;
         public static readonly long Frequency;
@@ -71,7 +71,7 @@ namespace PerformanceTypes
                 throw new Exception("Unable to use QueryPerformanceCounter. The StopwatchStruct only supports high-resolution timings currently.");
 
             IsHighResolution = true;
-            TickFrequency = (double)TicksPerSecond / Frequency;
+            TickFrequency = (double)TICKS_PER_SECOND / Frequency;
         }
 
         [DllImport("kernel32.dll")]
