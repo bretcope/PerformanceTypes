@@ -209,7 +209,7 @@ namespace PerformanceTypes
             while (cursor.MightHaveMore)
             {
                 var value = cursor.NextString();
-                if (value != null && IsMatchingString(value, buffer, start, length))
+                if (value != null && UnsafeStringComparer.AreEqual(value, buffer, start, length))
                     return value;
             }
 
@@ -272,20 +272,6 @@ namespace PerformanceTypes
             }
 
             _data = new BucketsAndSlots(newBuckets, newSlots, oldData.NextAvailableSlotIndex);
-        }
-
-        static bool IsMatchingString(string s, char[] buffer, int start, int length)
-        {
-            if (s.Length != length)
-                return false;
-
-            for (var i = start; i < length; i++)
-            {
-                if (s[i] != buffer[i])
-                    return false;
-            }
-
-            return true;
         }
     }
 }
