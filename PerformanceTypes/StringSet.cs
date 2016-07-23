@@ -26,6 +26,9 @@ namespace PerformanceTypes
             /// </summary>
             public bool MightHaveMore => SlotIndex >= 0;
 
+            /// <summary>
+            /// Returns the next string in the set with a matching Hash value, and advances the cursor. Returns null if there are no more matching strings.
+            /// </summary>
             public string NextString()
             {
                 var slots = (Slot[])Slots;
@@ -66,9 +69,19 @@ namespace PerformanceTypes
 
         readonly object _writeLock = new object();
 
+        /// <summary>
+        /// Number of strings currently contained in the set.
+        /// </summary>
         public int Count => _data.NextAvailableSlotIndex;
+        /// <summary>
+        /// The number of strings which can be held in the set before it will have to grow its internal data structures.
+        /// </summary>
         public int MaxSize => _data.Slots.Length;
 
+        /// <summary>
+        /// Initializes an empty set.
+        /// </summary>
+        /// <param name="initialSize">The initial number of strings the set can contain before having to resize its internal datastructures.</param>
         public StringSet(int initialSize)
         {
             _data = new BucketsAndSlots(new int[initialSize], new Slot[initialSize], 0);
@@ -90,6 +103,9 @@ namespace PerformanceTypes
             return GetEnumerator();
         }
 
+        /// <summary>
+        /// Returns a search cursor which allows you to iterate over every string in the set with the same StringHash.
+        /// </summary>
         public StringSearchCursor GetSearchCursor(StringHash hash)
         {
             var data = _data;
@@ -104,6 +120,12 @@ namespace PerformanceTypes
             return cursor;
         }
 
+        /// <summary>
+        /// Adds a string to the set if it does not already exist.
+        /// </summary>
+        /// <param name="str">The string to add to the set.</param>
+        /// <param name="knownHashValue">(optional) If the StringHash for str has already been calculated, you can provide it here to save re-calculation.</param>
+        /// <returns>True if the string was added. False if the string already existed in the set.</returns>
         public bool Add(string str, StringHash knownHashValue = default(StringHash))
         {
             if (knownHashValue == default(StringHash))
@@ -124,6 +146,15 @@ namespace PerformanceTypes
             return false;
         }
 
+        /// <summary>
+        /// Adds a string to the set if it does not already exist.
+        /// </summary>
+        /// <param name="buffer">The character array which represents the string you want to add.</param>
+        /// <param name="start">The index in the character array where your string starts.</param>
+        /// <param name="length">The length of the string you want to add.</param>
+        /// <param name="str">The string object representation of the characters. A new string is only allocated when it does not already exist in the set.</param>
+        /// <param name="knownHashValue">(optional) If the StringHash has already been calculated, you can provide it here to save re-calculation.</param>
+        /// <returns>True if the string was added. False if the string already existed in the set.</returns>
         public bool Add(char[] buffer, int start, int length, out string str, StringHash knownHashValue = default(StringHash))
         {
             if (knownHashValue == default(StringHash))
@@ -154,6 +185,14 @@ namespace PerformanceTypes
             }
         }
 
+        /// <summary>
+        /// Uses the characters from a buffer to check whether a string exists in the set, and retrieve it if so.
+        /// </summary>
+        /// <param name="buffer">The character array which represents the string you want to check for.</param>
+        /// <param name="start">The index in the character array where your string starts.</param>
+        /// <param name="length">The length of the string you want to check for.</param>
+        /// <param name="knownHashValue">(optional) If the StringHash has already been calculated, you can provide it here to save re-calculation.</param>
+        /// <returns>If found in the set, the existing string is returned. If not found, null is returned.</returns>
         public string GetExistingString(char[] buffer, int start, int length, StringHash knownHashValue = default(StringHash))
         {
             if (knownHashValue == default(StringHash))

@@ -13,6 +13,9 @@ namespace PerformanceTypes
 
         public uint Value { get; private set; }
 
+        /// <summary>
+        /// Returns an initialized StringHash struct which can be used for iterating over characters via Iterate().
+        /// </summary>
         public static StringHash Begin()
         {
             var hash = new StringHash();
@@ -20,11 +23,17 @@ namespace PerformanceTypes
             return hash;
         }
 
+        /// <summary>
+        /// Allows you to iteratively calculate the hash value, one character at a time.
+        /// </summary>
         public void Iterate(char c)
         {
             Value = unchecked((c ^ Value) * FNV_PRIME);
         }
 
+        /// <summary>
+        /// Returns a calculated StringHash for the string.
+        /// </summary>
         public static StringHash GetHash(string s)
         {
             if (s == null)
@@ -37,6 +46,12 @@ namespace PerformanceTypes
             return hash;
         }
 
+        /// <summary>
+        /// Returns a calculated StringHash for the characters in the buffer.
+        /// </summary>
+        /// <param name="buffer">The characters which represent a string to hash.</param>
+        /// <param name="start">The offset into the buffer where your string starts.</param>
+        /// <param name="length">The length of the string you are hashing.</param>
         public static StringHash GetHash(char[] buffer, int start, int length)
         {
             AssertBufferArgumentsAreSane(buffer.Length, start, length);
