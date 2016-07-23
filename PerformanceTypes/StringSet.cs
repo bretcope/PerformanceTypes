@@ -133,7 +133,7 @@ namespace PerformanceTypes
                 if (str == null)
                 {
                     // it definitely doesn't exist. Let's add it
-                    str = new string(buffer, 0, length);
+                    str = new string(buffer, start, length);
                     AddImpl(str, knownHashValue);
                     return true;
                 }
