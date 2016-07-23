@@ -5,6 +5,7 @@ This library is a small collection of specialized helper types which focus on pe
 - [StopwatchStruct](#stopwatchstruct)
 - [StringSet](#stringset)
   - [StringHash](#stringhash)
+- [UnsafeStringComparer](#unsafestringcomparer)
 
 ## StopwatchStruct
 
@@ -164,4 +165,38 @@ for (var i = 0; i < buffer.Length; i++)
 ```
 
 Obviously that's a lot more code, but it may be worth it for high-volume parsers.
+
+## UnsafeStringComparer
+
+[UnsafeStringComparer](https://github.com/bretcope/PerformanceTypes/blob/master/PerformanceTypes/UnsafeStringComparer.cs) is a static helper class which helps you perform fast string equality comparisons when one operand is a string and the other is a character buffer. It is called "Unsafe..." because it uses [unsafe](https://msdn.microsoft.com/en-us/library/chfa2zb8.aspx) code for optimizations and some methods accept pointers.
+
+For strings with seven or fewer characters, they are compared one character at a time. For strings with eight or more characters, UnsafeStringComparer will switch to comparing four characters at a time via 64-bit integers, which can result in an almost 4x performance improvement.
+
+> SIMD would likely provide additional performance improvements, but C# does not appear to provide a way to use SIMD with unmanaged pointers. It would have to be done in a native dll, which would make this library less portable.
+
+There is only one method with four public overloads:
+
+```csharp
+bool AreEqual(string str, char[] buffer)
+```
+
+>  Compares all characters from `str` with all characters in `buffer`.
+
+```csharp
+bool AreEqual(string str, char[] buffer, int start, int length)
+```
+
+> Compares all characters from `str` with the characters in buffer beginning at the `start` index, and for `length` characters. If `length != str.Length`, or if `start + length > buffer.Length`, the return value will always be false.
+
+```csharp
+bool AreEqual(string str, char* buffer, int length)
+```
+
+> Compares all the characters from `str` with a character buffer pointed to by `buffer` for `length` characters. If `length != str.Length`, the return value will always be false. It is up to you to ensure that the buffer has at least `length` characters remaining, or this method may read from memory outside your buffer.
+
+```csharp
+bool AreEqual(char* aPtr, char* bPtr, int length)
+```
+
+> Compares characters from two buffers pointed at by `aPtr` and `bPtr` for `length` characters. It is up to you to ensure both buffers have at least `length` characters remaining, or this method may read from memory outside your buffers.
 
