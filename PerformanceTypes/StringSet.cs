@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace PerformanceTypes
 {
-    public class StringSet
+    public class StringSet : IReadOnlyCollection<string>
     {
         struct Slot
         {
@@ -70,6 +72,22 @@ namespace PerformanceTypes
         public StringSet(int initialSize)
         {
             _data = new BucketsAndSlots(new int[initialSize], new Slot[initialSize], 0);
+        }
+
+        public IEnumerator<string> GetEnumerator()
+        {
+            var slots = _data.Slots;
+            foreach (var slot in slots)
+            {
+                var str = slot.Value;
+                if (str != null)
+                    yield return str;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         public StringSearchCursor GetSearchCursor(StringHash hash)
