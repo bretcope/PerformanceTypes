@@ -160,7 +160,7 @@ namespace PerformanceTypes.Tests
         {
             fixed (char* ptr = chars)
             {
-                Assert.True(UnsafeStringComparer.AreEqual(s, ptr), $"Didn't match. String: \"{s}\", Chars: \"{new string(chars)}\"");
+                Assert.True(UnsafeStringComparer.AreEqual(s, ptr, s.Length), $"Didn't match. String: \"{s}\", Chars: \"{new string(chars)}\"");
             }
         }
 
@@ -168,7 +168,7 @@ namespace PerformanceTypes.Tests
         {
             fixed (char* ptr = chars)
             {
-                Assert.False(UnsafeStringComparer.AreEqual(s, ptr), $"Incorrect match. String: \"{s}\", Chars: \"{new string(chars)}\"");
+                Assert.False(UnsafeStringComparer.AreEqual(s, ptr, s.Length), $"Incorrect match. String: \"{s}\", Chars: \"{new string(chars)}\"");
             }
         }
 

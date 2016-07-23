@@ -89,12 +89,15 @@ namespace PerformanceTypes
         /// <param name="str">The string to compare against the character buffer.</param>
         /// <param name="buffer">
         /// A pointer to the first character to compare in a buffer.
-        /// The buffer must have least str.Length chars remaining to prevent reading out of bounds.
+        /// The buffer must have least length chars remaining to prevent reading out of bounds.
         /// </param>
+        /// <param name="length">The number of characters in the buffer to compare. If length does not equal str.Length, this method will always return false.</param>
         /// <returns>True if the characters in the string and buffer were equal.</returns>
-        public static unsafe bool AreEqual(string str, char* buffer)
+        public static unsafe bool AreEqual(string str, char* buffer, int length)
         {
-            var length = str.Length;
+            if (str.Length != length)
+                return false;
+
             switch (length)
             {
                 case 0:
