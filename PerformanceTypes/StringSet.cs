@@ -85,12 +85,6 @@ namespace PerformanceTypes
 
             return cursor;
         }
-        
-        public string GetFirstByHash(StringHash hash)
-        {
-            var cursor = GetSearchCursor(hash);
-            return cursor.NextString();
-        }
 
         public bool Add(string str, StringHash knownHashValue = default(StringHash))
         {
