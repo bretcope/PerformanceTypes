@@ -19,16 +19,16 @@ namespace PerformanceTypes
             internal int SlotIndex;
 
             /// <summary>
-            /// Indicates that there are more strings to search. The next call to NextString() may still return null even if HasMore is true.
-            /// NextString() will always return null if HasMore is false.
+            /// Indicates that there are more strings to search. However, the next call to NextString() may still return null even if MightHaveMore is true.
+            /// NextString() will always return null if MightHaveMore is false.
             /// </summary>
-            public bool HasMore => SlotIndex >= 0;
+            public bool MightHaveMore => SlotIndex >= 0;
 
             public string NextString()
             {
                 var slots = (Slot[])Slots;
 
-                while (HasMore)
+                while (MightHaveMore)
                 {
                     var index = SlotIndex;
                     var value = slots[index].Value;
@@ -155,7 +155,7 @@ namespace PerformanceTypes
         string GetExistingStringImpl(char[] buffer, int start, int length, StringHash hash)
         {
             var cursor = GetSearchCursor(hash);
-            while (cursor.HasMore)
+            while (cursor.MightHaveMore)
             {
                 var value = cursor.NextString();
                 if (value != null && IsMatchingString(value, buffer, start, length))
@@ -168,7 +168,7 @@ namespace PerformanceTypes
         bool ContainsString(string str, StringHash hash)
         {
             var cursor = GetSearchCursor(hash);
-            while (cursor.HasMore)
+            while (cursor.MightHaveMore)
             {
                 if (str == cursor.NextString())
                     return true;

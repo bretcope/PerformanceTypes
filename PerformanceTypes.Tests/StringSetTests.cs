@@ -128,13 +128,13 @@ namespace PerformanceTypes.Tests
             Assert.AreEqual(4, set.Count);
             Assert.AreEqual(4, set.MaxSize); // hash collisions shouldn't cause the set to grow
 
-            Assert.True(cursor.HasMore);
+            Assert.True(cursor.MightHaveMore);
             Assert.AreSame(three, cursor.NextString());
-            Assert.True(cursor.HasMore);
+            Assert.True(cursor.MightHaveMore);
             Assert.AreSame(two, cursor.NextString());
-            Assert.True(cursor.HasMore);
+            Assert.True(cursor.MightHaveMore);
             Assert.AreSame(one, cursor.NextString());
-            Assert.False(cursor.HasMore);
+            Assert.False(cursor.MightHaveMore);
         }
     }
 }
