@@ -319,7 +319,7 @@ namespace PerformanceTypes
 
             _realPosition = pos + 4;
         }
-
+        
         public unsafe void ReadEightBytes(byte* dest)
         {
             if (UnreadByteCount < 8)
@@ -340,23 +340,47 @@ namespace PerformanceTypes
             _realPosition = pos + 8;
         }
 
+        /// <summary>
+        /// Writes an unsigned integer 7-bits at a time. Requires between one and ten (inclusive) bytes depending on how large the integer is.
+        /// </summary>
         public void WriteVarUInt(ulong value)
         {
-            var bytes = BytesRequiredForVarInt(value);
+            var byteCount = BytesRequiredForVarInt(value);
 
             int pos, newPos;
-            EnsureRoomFor(bytes, out pos, out newPos);
-            WriteVarIntImpl(value, bytes, pos);
+            EnsureRoomFor(byteCount, out pos, out newPos);
+            WriteVarIntImpl(value, byteCount, pos);
 
             UpdateWritePosition(newPos);
         }
 
+        /// <summary>
+        /// Reads unsigned integers which were written using WriteVarUInt().
+        /// </summary>
         public ulong ReadVarUInt()
         {
+            var data = Data;
             var pos = _realPosition;
-            int newPos;
-            var value = ReadVarIntImpl(pos, out newPos);
-            _realPosition = newPos;
+
+            var lastByte = data[pos];
+            var value = (ulong)(lastByte & 0x7F);
+            pos++;
+
+            var shift = 0;
+            while ((lastByte & 0x80) != 0)
+            {
+                lastByte = data[pos];
+                pos++;
+
+                shift += 7;
+                value |= (ulong)(lastByte & 0x7F) << shift;
+            }
+
+            // check if we read too far
+            if (pos > _endPosition)
+                throw new IndexOutOfRangeException();
+
+            _realPosition = pos;
 
             return value;
         }
@@ -383,7 +407,6 @@ namespace PerformanceTypes
         /// Sets the length of the stream. Any data in the underlying data array is not altered. If there is not enough capacity in the underlying array and
         /// CanGrow is false, an exception will be thrown.
         /// </summary>
-        /// <param name="value"></param>
         public override void SetLength(long value)
         {
             if (value < 0 || value > int.MaxValue)
@@ -397,9 +420,7 @@ namespace PerformanceTypes
             if (newEnd > Data.Length)
                 Grow(newEnd);
 
-            _endPosition = (int)newEnd;
-
-            throw new NotImplementedException();
+            _endPosition = newEnd;
         }
 
         /// <summary>
@@ -433,19 +454,54 @@ namespace PerformanceTypes
                 _endPosition = newPos;
         }
 
-        void WriteVarIntImpl(ulong value, int bytes, int pos)
+        /// <summary>
+        /// Writes the VarUInt at the real index specificed by <paramref name="pos"/>. Does not modify _realPosition.
+        /// </summary>
+        /// <param name="value">The value of the integer being written.</param>
+        /// <param name="byteCount">The number of bytes to write. This should be pre-calculated using BytesRequiredForVarInt().</param>
+        /// <param name="pos">The real position to begin writing the value.</param>
+        void WriteVarIntImpl(ulong value, int byteCount, int pos)
         {
-            //
-            while (bytes > 0)
+            var data = Data;
+
+            var endMinusOne = pos + byteCount - 1;
+            while (pos < endMinusOne)
             {
-                //
-                bytes--;
+                data[pos] = (byte)((value & 0x7F) | 0x80);
+                value >>= 7;
+                pos++;
             }
+
+            // the last byte is just what's left in value
+            data[pos] = (byte)value;
         }
 
-        ulong ReadVarIntImpl(int pos, out int newPos)
+        static int BytesRequiredForVarInt(ulong value)
         {
-            throw new NotImplementedException();
+            // Binary search would be O(log n) instead of O(n) for linear search, but most values you would want to write with a VarInt
+            // are integers which represent a count of something, and those are going to tend to be low-value integers, so linear should
+            // be pretty good for the 
+
+            if ((value & ~0x7FUL) == 0)
+                return 1;
+            if ((value & ~0x3FFFUL) == 0)
+                return 2;
+            if ((value & ~0x1FFFFFUL) == 0)
+                return 3;
+            if ((value & ~0xFFFFFFFUL) == 0)
+                return 4;
+            if ((value & ~0x7FFFFFFFFUL) == 0)
+                return 5;
+            if ((value & ~0x3FFFFFFFFFFUL) == 0)
+                return 6;
+            if ((value & ~0x1FFFFFFFFFFFFUL) == 0)
+                return 7;
+            if ((value & ~0xFFFFFFFFFFFFFFUL) == 0)
+                return 8;
+            if ((value & ~0x7FFFFFFFFFFFFFFFUL) == 0)
+                return 9;
+
+            return 10;
         }
 
         static unsafe void UnsafeMemoryCopy(byte* src, byte* dest, int count)
@@ -454,8 +510,8 @@ namespace PerformanceTypes
 
             if (count > 8)
             {
-                var longs = count / sizeof(long);
-                remainder = count % sizeof(long);
+                var longs = count / 8;
+                remainder = count % 8;
 
                 var srcLong = (long*)src;
                 var destLong = (long*)dest;

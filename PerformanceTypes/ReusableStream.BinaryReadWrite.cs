@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace PerformanceTypes
 {
@@ -177,49 +178,91 @@ namespace PerformanceTypes
             throw new NotImplementedException();
         }
 
-        public void WriteString(char[] chars, int offset, int length, bool nullable)
+        public void WriteString(char[] chars, int offset, int count, bool nullable)
         {
             throw new NotImplementedException();
         }
 
-        public unsafe void WriteString(char* chars, int length, bool nullable)
+        public unsafe void WriteString(char* chars, int count, bool nullable)
         {
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count));
+
             if (chars == null)
             {
                 if (!nullable)
                     throw new ArgumentNullException(nameof(chars));
 
-                throw new NotImplementedException();
+                WriteByte(0); // first byte indicates zero length
+                WriteByte(1); // second byte = 1 indicates null
                 return;
             }
 
-            throw new NotImplementedException();
+            if (count == 0)
+            {
+                WriteByte(0); // first byte indicates zero length
+
+                if (nullable)
+                    WriteByte(0); // second byte = 0 indicates a zero-length string rather than null
+                
+                return;
+            }
+
+            // we actually have some characters to write
+            var encoding = Encoding;
+            var maxSize = Encoding.GetMaxByteCount(count);
+            var varIntByteCount = BytesRequiredForVarInt((ulong)maxSize);
+            var varIntPos = _realPosition;
+
+            var pos = varIntPos + varIntByteCount; // leave a spot to write the length prefix
+
+            var data = Data;
+            var remainingInBuffer = data.Length - pos;
+
+            if (maxSize > remainingInBuffer)
+            {
+                // there might not be enough room in the data buffer
+                var minSize = GetMinimumEncodedByteCount(encoding, count);
+                if (minSize > remainingInBuffer)
+                {
+                    // there definitely isn't room for the string, attempt to grow to cover the max size
+                    Grow(pos + maxSize);
+                }
+                else
+                {
+                    // Either we don't know what the minimum size of this encoding is, or the minimum size is small enough to fit in
+                    // the data buffer. Either way, unfortunately we now have to check how big the string will actually be before we write it.
+                    var realSize = encoding.GetByteCount(chars, count);
+                    if (realSize > remainingInBuffer)
+                    {
+                        Grow(pos + realSize);
+                    }
+                }
+            }
+
+            // if we've gotten here, then the data buffer is large enough to hold the string. Time to perform the write
+            int bytesWritten;
+            fixed (byte* dataPtr = data)
+            {
+                bytesWritten = Encoding.GetBytes(chars, count, dataPtr, maxSize);
+            }
+
+            WriteVarIntImpl((ulong)bytesWritten, varIntByteCount, varIntPos);
+
+            UpdateWritePosition(pos + bytesWritten);
         }
 
-        static int BytesRequiredForVarInt(ulong value)
+        static int? GetMinimumEncodedByteCount(Encoding encoding, int charCount)
         {
-            // could maybe do a binary search instead of linear, but most will probably be low integers
+            if (encoding == Encoding.UTF8 || encoding == Encoding.ASCII || encoding == Encoding.UTF7)
+                return charCount;
 
-            if ((value & ~0x7FUL) == 0)
-                return 1;
-            if ((value & ~0x3FFFUL) == 0)
-                return 2;
-            if ((value & ~0x1FFFFFUL) == 0)
-                return 3;
-            if ((value & ~0xFFFFFFFUL) == 0)
-                return 4;
-            if ((value & ~0x7FFFFFFFFUL) == 0)
-                return 5;
-            if ((value & ~0x3FFFFFFFFFFUL) == 0)
-                return 6;
-            if ((value & ~0x1FFFFFFFFFFFFUL) == 0)
-                return 7;
-            if ((value & ~0xFFFFFFFFFFFFFFUL) == 0)
-                return 8;
-            if ((value & ~0x7FFFFFFFFFFFFFFFUL) == 0)
-                return 9;
+            // in theory, if every pair of characters were surrogate pairs, UTF32 could encode to the same size as UTF16
+            if (encoding == Encoding.Unicode || encoding == Encoding.UTF32)
+                return charCount * 2;
 
-            return 10;
+            // don't know anything about this encoding
+            return null;
         }
     }
 }
