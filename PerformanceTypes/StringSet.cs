@@ -151,18 +151,18 @@ namespace PerformanceTypes
         /// </summary>
         /// <param name="buffer">The character array which represents the string you want to add.</param>
         /// <param name="start">The index in the character array where your string starts.</param>
-        /// <param name="length">The length of the string you want to add.</param>
+        /// <param name="count">The length of the string you want to add.</param>
         /// <param name="str">The string object representation of the characters. A new string is only allocated when it does not already exist in the set.</param>
         /// <param name="knownHashValue">(optional) If the StringHash has already been calculated, you can provide it here to save re-calculation.</param>
         /// <returns>True if the string was added. False if the string already existed in the set.</returns>
-        public bool Add(char[] buffer, int start, int length, out string str, StringHash knownHashValue = default(StringHash))
+        public bool Add(char[] buffer, int start, int count, out string str, StringHash knownHashValue = default(StringHash))
         {
             if (knownHashValue == default(StringHash))
-                knownHashValue = StringHash.GetHash(buffer, start, length);
+                knownHashValue = StringHash.GetHash(buffer, start, count);
             else
-                StringHash.AssertBufferArgumentsAreSane(buffer.Length, start, length);
+                StringHash.AssertBufferArgumentsAreSane(buffer.Length, start, count);
 
-            str = GetExistingStringImpl(buffer, start, length, knownHashValue);
+            str = GetExistingStringImpl(buffer, start, count, knownHashValue);
 
             if (str != null)
                 return false; // didn't add anything
@@ -171,12 +171,40 @@ namespace PerformanceTypes
             lock (_writeLock)
             {
                 // first, check one more time to see if it exists
-                str = GetExistingStringImpl(buffer, start, length, knownHashValue);
+                str = GetExistingStringImpl(buffer, start, count, knownHashValue);
 
                 if (str == null)
                 {
                     // it definitely doesn't exist. Let's add it
-                    str = new string(buffer, start, length);
+                    str = new string(buffer, start, count);
+                    AddImpl(str, knownHashValue);
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public unsafe bool Add(char* chars, int count, out string str, StringHash knownHashValue = default(StringHash))
+        {
+            if (knownHashValue == default(StringHash))
+                knownHashValue = StringHash.GetHash(chars, count);
+
+            str = GetExistingString(chars, count, knownHashValue);
+
+            if (str != null)
+                return false; // didn't add anything
+
+            // an existing string wasn't found, we need to add it to the hash
+            lock (_writeLock)
+            {
+                // first, check one more time to see if it exists
+                str = GetExistingString(chars, count, knownHashValue);
+
+                if (str == null)
+                {
+                    // it definitely doesn't exist. Let's add it
+                    str = new string(chars, 0, count);
                     AddImpl(str, knownHashValue);
                     return true;
                 }
@@ -190,17 +218,33 @@ namespace PerformanceTypes
         /// </summary>
         /// <param name="buffer">The character array which represents the string you want to check for.</param>
         /// <param name="start">The index in the character array where your string starts.</param>
-        /// <param name="length">The length of the string you want to check for.</param>
+        /// <param name="count">The length of the string you want to check for.</param>
         /// <param name="knownHashValue">(optional) If the StringHash has already been calculated, you can provide it here to save re-calculation.</param>
         /// <returns>If found in the set, the existing string is returned. If not found, null is returned.</returns>
-        public string GetExistingString(char[] buffer, int start, int length, StringHash knownHashValue = default(StringHash))
+        public string GetExistingString(char[] buffer, int start, int count, StringHash knownHashValue = default(StringHash))
         {
             if (knownHashValue == default(StringHash))
-                knownHashValue = StringHash.GetHash(buffer, start, length);
+                knownHashValue = StringHash.GetHash(buffer, start, count);
             else
-                StringHash.AssertBufferArgumentsAreSane(buffer.Length, start, length);
+                StringHash.AssertBufferArgumentsAreSane(buffer.Length, start, count);
 
-            return GetExistingStringImpl(buffer, start, length, knownHashValue);
+            return GetExistingStringImpl(buffer, start, count, knownHashValue);
+        }
+
+        public unsafe string GetExistingString(char* chars, int count, StringHash knownHashValue = default(StringHash))
+        {
+            if (knownHashValue == default(StringHash))
+                knownHashValue = StringHash.GetHash(chars, count);
+
+            var cursor = GetSearchCursor(knownHashValue);
+            while (cursor.MightHaveMore)
+            {
+                var value = cursor.NextString();
+                if (value != null && UnsafeStringComparer.AreEqual(value, chars, count))
+                    return value;
+            }
+
+            return null;
         }
 
         string GetExistingStringImpl(char[] buffer, int start, int length, StringHash hash)

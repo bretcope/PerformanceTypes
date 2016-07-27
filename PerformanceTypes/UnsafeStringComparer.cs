@@ -21,20 +21,20 @@ namespace PerformanceTypes
         /// <param name="str">The string to compare against the character buffer.</param>
         /// <param name="buffer">The buffer to compare against the string.</param>
         /// <param name="start">The offset into the buffer where comparison with the string should start.</param>
-        /// <param name="length">
+        /// <param name="count">
         /// The length of characters in the buffer to compare against the string.
         /// If length and str.Length don't match, this method will always return false
         /// </param>
         /// <returns>True if the characters in the string and buffer were equal.</returns>
-        public static unsafe bool AreEqual(string str, char[] buffer, int start, int length)
+        public static unsafe bool AreEqual(string str, char[] buffer, int start, int count)
         {
-            if (str.Length != length)
+            if (str.Length != count)
                 return false;
 
-            if (start + length > buffer.Length)
+            if (start + count > buffer.Length)
                 return false;
 
-            switch (length)
+            switch (count)
             {
                 case 0:
                     return true;
@@ -79,7 +79,7 @@ namespace PerformanceTypes
             fixed (char* sPtr = str)
             fixed (char* bPtr = buffer)
             {
-                return CompareByLong(sPtr, bPtr + start, length);
+                return CompareByLong(sPtr, bPtr + start, count);
             }
         }
 
@@ -91,14 +91,14 @@ namespace PerformanceTypes
         /// A pointer to the first character to compare in a buffer.
         /// The buffer must have least length chars remaining to prevent reading out of bounds.
         /// </param>
-        /// <param name="length">The number of characters in the buffer to compare. If length does not equal str.Length, this method will always return false.</param>
+        /// <param name="count">The number of characters in the buffer to compare. If length does not equal str.Length, this method will always return false.</param>
         /// <returns>True if the characters in the string and buffer were equal.</returns>
-        public static unsafe bool AreEqual(string str, char* buffer, int length)
+        public static unsafe bool AreEqual(string str, char* buffer, int count)
         {
-            if (str.Length != length)
+            if (str.Length != count)
                 return false;
 
-            switch (length)
+            switch (count)
             {
                 case 0:
                     return true;
@@ -140,7 +140,7 @@ namespace PerformanceTypes
                 default:
                     fixed (char* sPtr = str)
                     {
-                        return CompareByLong(sPtr, buffer, length);
+                        return CompareByLong(sPtr, buffer, count);
                     }
             }
         }
@@ -150,14 +150,14 @@ namespace PerformanceTypes
         /// </summary>
         /// <param name="aPtr">A pointer to the first character to compare in the first buffer.</param>
         /// <param name="bPtr">A pointer to the first character to compare in the second buffer.</param>
-        /// <param name="length">The number of characters to compare in each buffer.</param>
+        /// <param name="count">The number of characters to compare in each buffer.</param>
         /// <returns>True if the characters in the two buffers were equal.</returns>
-        public static unsafe bool AreEqual(char* aPtr, char* bPtr, int length)
+        public static unsafe bool AreEqual(char* aPtr, char* bPtr, int count)
         {
             if (aPtr == bPtr) // they point to the same memory, so they're definitely equal
                 return true;
 
-            switch (length)
+            switch (count)
             {
                 case 0:
                     return true;
@@ -197,16 +197,16 @@ namespace PerformanceTypes
                         && aPtr[5] == bPtr[5]
                         && aPtr[6] == bPtr[6];
                 default:
-                    return CompareByLong(aPtr, bPtr, length);
+                    return CompareByLong(aPtr, bPtr, count);
             }
         }
 
 
-        static unsafe bool CompareByLong(char* aPtr, char* bPtr, int length)
+        static unsafe bool CompareByLong(char* aPtr, char* bPtr, int count)
         {
             const int divisor = sizeof(long) / sizeof(char);
-            var longs = length / divisor;
-            var remainder = length % divisor;
+            var longs = count / divisor;
+            var remainder = count % divisor;
 
             var aLong = (long*)aPtr;
             var bLong = (long*)bPtr;

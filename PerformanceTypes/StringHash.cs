@@ -51,12 +51,12 @@ namespace PerformanceTypes
         /// </summary>
         /// <param name="buffer">The characters which represent a string to hash.</param>
         /// <param name="start">The offset into the buffer where your string starts.</param>
-        /// <param name="length">The length of the string you are hashing.</param>
-        public static StringHash GetHash(char[] buffer, int start, int length)
+        /// <param name="count">The length of the string you are hashing.</param>
+        public static StringHash GetHash(char[] buffer, int start, int count)
         {
-            AssertBufferArgumentsAreSane(buffer.Length, start, length);
+            AssertBufferArgumentsAreSane(buffer.Length, start, count);
 
-            var end = start + length;
+            var end = start + count;
             var hash = Begin();
             for (var i = start; i < end; i++)
             {
@@ -66,16 +66,29 @@ namespace PerformanceTypes
             return hash;
         }
 
-        internal static void AssertBufferArgumentsAreSane(int bufferLength, int start, int length)
+        public static unsafe StringHash GetHash(char* chars, int count)
+        {
+            var end = chars + count;
+            var hash = Begin();
+            while (chars < end)
+            {
+                hash.Iterate(*chars);
+                chars++;
+            }
+
+            return hash;
+        }
+
+        internal static void AssertBufferArgumentsAreSane(int bufferLength, int start, int count)
         {
             if (start < 0)
                 throw new ArgumentOutOfRangeException(nameof(start), "Start argument cannot be negative");
 
-            if (length < 0)
-                throw new ArgumentOutOfRangeException(nameof(length), "Length argument cannot be negative");
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count), "Length argument cannot be negative");
 
-            if (start + length > bufferLength)
-                throw new Exception($"Start ({start}) plus length ({length}) arguments must be less than or equal to buffer.Length ({bufferLength}).");
+            if (start + count > bufferLength)
+                throw new Exception($"Start ({start}) plus length ({count}) arguments must be less than or equal to buffer.Length ({bufferLength}).");
         }
 
         public static bool operator ==(StringHash a, StringHash b)

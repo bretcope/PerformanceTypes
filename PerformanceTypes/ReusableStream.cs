@@ -5,10 +5,33 @@ using System.Text;
 
 namespace PerformanceTypes
 {
+    public struct StringSetOptions
+    {
+        /// <summary>
+        /// For any string whose encoded size (in bytes) is less than or equal to this value, a lookup in StringSet will be performed before allocating a new
+        /// string. If the string already exists in StringSet, then no allocation occurs. If it does not exist in StringSet, or if its encoded size is larger
+        /// than this value, then a new string is allocated. Newly allocated strings are NOT automatically added to StringSet unless
+        /// PerformDangerousAutoAddToSet is true.
+        /// 
+        /// For performance reasons, it is recommended to use a small value, such as 256, or less. Use zero to disable StringSet lookups altogether.
+        /// </summary>
+        public int MaxEncodedSizeToLookupInSet { get; set; }
+        /// <summary>
+        /// NEVER use this option when reading user-provided or arbitrary input, unless you plan to recycle the StringSet (allow it to be garbage collected).
+        /// Failing to follow that advice could lead to unbounded memory growth. If is recommended that you avoid this option unless you understand the
+        /// implications and risks.
+        /// Does not allocate a new string if it already exists in the StringSet. Newly allocated strings are automatically added to the StringSet.
+        /// Only applies to strings whose encoded size is less than MaxEncodedSizeToLookupInSet (in bytes).
+        /// </summary>
+        public bool PerformDangerousAutoAddToSet { get; set; }
+    }
+
     public partial class ReusableStream : Stream
     {
         int _realPosition; // offset + position
         int _endPosition;  // offset + length used
+
+        StringSetOptions _defaultStringSetOptions;
 
         public byte[] Data { get; private set; }
         public bool CanGrow { get; private set; }
@@ -25,20 +48,12 @@ namespace PerformanceTypes
         /// <summary>
         /// Gets or sets the encoding used for reading and writing strings.
         /// </summary>
-        public Encoding Encoding { get; set; } = Encoding.UTF8;
+        public Encoding DefaultEncoding { get; set; } = Encoding.UTF8;
         /// <summary>
-        /// A StringSet which can be used as a string intern pool if UseStringSet is true.
+        /// A StringSet which can be used as a string intern pool. Usage of this is configured via the StringSetOptions struct which is passed to
+        /// SetDefaultStringSetOptions(), or as an optional parameter to the ReadString() methods.
         /// </summary>
         public StringSet StringSet { get; set; }
-        /// <summary>
-        /// True to use the StringSet as a string intern pool. Any strings which exist in the pool will not require an allocation when they are read.
-        /// </summary>
-        public bool UseStringSet { get; set; }
-        /// <summary>
-        /// True if strings should automatically be added to the StringSet intern pool.
-        /// WARNING: Never set this to true if you will be reading strings from user-input, as this could cause unbounded memory growth.
-        /// </summary>
-        public bool AcceptDangerOfAutoInterningStrings { get; set; }
 
         public override long Position
         {
@@ -125,6 +140,17 @@ namespace PerformanceTypes
         public void ResetForReading()
         {
             _realPosition = Offset;
+        }
+
+        // not exposing this as a property because it's a struct and would likely cause surprising behavior to some users
+        public StringSetOptions GetDefaultStringSetOptions()
+        {
+            return _defaultStringSetOptions;
+        }
+
+        public void SetDefaultStringSetOptions(StringSetOptions options)
+        {
+            _defaultStringSetOptions = options;
         }
 
         /// <summary>
@@ -438,12 +464,32 @@ namespace PerformanceTypes
                 Grow(newPos);
         }
 
-        void Grow(int minimumSize)
+        byte[] Grow(int minimumSize)
         {
             if (!CanGrow)
                 throw new InvalidOperationException($"ReusableStream cannot grow to the required size ({minimumSize}) because CanGrow is false");
 
-            throw new NotImplementedException();
+            if (minimumSize < 0)
+                throw new ArgumentOutOfRangeException(nameof(minimumSize));
+
+            var oldData = Data;
+            var oldSize = oldData.Length;
+
+            var newSize = oldSize;
+            do
+            {
+                newSize *= 2;
+
+            } while (newSize < minimumSize && newSize > oldSize);
+
+            if (newSize < minimumSize) // could happen if there is an overflow
+                newSize = minimumSize;
+
+            var newData = new byte[newSize];
+            Array.Copy(oldData, newData, oldSize);
+            Data = newData;
+
+            return newData;
         }
         
         void UpdateWritePosition(int newPos)
