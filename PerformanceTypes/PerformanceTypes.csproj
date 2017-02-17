@@ -47,6 +47,8 @@
     <Compile Include="StopwatchStruct.cs" />
     <Compile Include="StringHash.cs" />
     <Compile Include="StringSet.cs" />
+    <Compile Include="Unsafe.cs" />
+    <Compile Include="UnsafeMd5.cs" />
     <Compile Include="UnsafeStringComparer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
