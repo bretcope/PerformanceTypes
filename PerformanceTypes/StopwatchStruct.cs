@@ -87,7 +87,7 @@ namespace PerformanceTypes
         /// <summary>
         /// Returns true if the Stopwatch struct can be used on the current system. Only Windows is supported.
         /// </summary>
-        public static readonly bool CanUse;
+        public static bool CanUse { get; }
         /// <summary>
         /// True if high-resolution timing is available. Currently this is always true if <see cref="CanUse"/> is true.
         /// </summary>
@@ -95,25 +95,33 @@ namespace PerformanceTypes
         /// <summary>
         /// The resolution of QueryPerformanceCounter (in "counts" per second).
         /// </summary>
-        public static readonly long CountsPerSecond;
+        public static long CountsPerSecond { get; }
         /// <summary>
         /// The resolution of QueryPerformanceCounter (in "counts" per second).
         /// </summary>
-        public static readonly double CountsPerMillisecond;
+        public static double CountsPerMillisecond { get; }
+        /// <summary>
+        /// If an exception occurred during initialization, it will be available here.
+        /// </summary>
+        public static Exception InitializationException { get; }
 
         static StopwatchStruct()
         {
             try
             {
-                var succeeded = QueryPerformanceFrequency(out CountsPerSecond);
+                long countsPerSecond;
+                var succeeded = QueryPerformanceFrequency(out countsPerSecond);
+
                 if (succeeded)
                 {
                     CanUse = true;
-                    CountsPerMillisecond = CountsPerSecond / 1000.0;
+                    CountsPerSecond = countsPerSecond;
+                    CountsPerMillisecond = countsPerSecond / 1000.0;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                InitializationException = ex;
             }
         }
 
