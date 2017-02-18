@@ -8,7 +8,7 @@ namespace PerformanceTypes
     /// <summary>
     /// Represents the result of an MD5 hash operation.
     /// </summary>
-    [StructLayout(LayoutKind.Explicit, Size = 16)]
+    [StructLayout(LayoutKind.Explicit, Size = SIZE)]
     [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Local")]
     public struct Md5Digest
     {
@@ -23,7 +23,7 @@ namespace PerformanceTypes
         /// <summary>
         /// The size of an <see cref="Md5Digest"/> struct (in bytes).
         /// </summary>
-        public static int Size => 16;
+        public const int SIZE = 16;
 
         /// <summary>
         /// Returns the raw bytes from the struct. Note that <see cref="Md5Digest"/> is primarily intended to be used in unsafe context where you can simply
@@ -56,7 +56,7 @@ namespace PerformanceTypes
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
 
-            if (index + Size > buffer.Length)
+            if (index + SIZE > buffer.Length)
                 throw new InvalidOperationException($"Buffer is not large enough to write 16 bytes at index {index}. Length = {buffer.Length}");
 
             fixed (byte* ptr = buffer)
@@ -77,7 +77,7 @@ namespace PerformanceTypes
             longPtr[0] = _ab;
             longPtr[1] = _cd;
 
-            return Size;
+            return SIZE;
         }
     }
 
