@@ -140,12 +140,11 @@ namespace PerformanceTypes
         }
 
         /// <summary>
-        /// Calls GetHashCode() on <see cref="Value"/> and returns the result. Note, this value will not be the string hash. It will be a hash of the string
-        /// hash.
+        /// Returns the signed 32-bit integer value of the hash.
         /// </summary>
         public override int GetHashCode()
         {
-            return Value.GetHashCode();
+            return (int)Value;
         }
     }
 }
