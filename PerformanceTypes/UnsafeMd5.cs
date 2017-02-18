@@ -10,7 +10,7 @@ namespace PerformanceTypes
     /// </summary>
     [StructLayout(LayoutKind.Explicit, Size = SIZE)]
     [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Local")]
-    public struct Md5Digest
+    public struct Md5Digest : IEquatable<Md5Digest>
     {
         [FieldOffset(0)] internal uint A;
         [FieldOffset(4)] internal uint B;
@@ -78,6 +78,47 @@ namespace PerformanceTypes
             longPtr[1] = _cd;
 
             return SIZE;
+        }
+
+        /// <summary>
+        /// Returns true if both <see cref="Md5Digest"/> operands have the same value.
+        /// </summary>
+        public static bool operator ==(Md5Digest a, Md5Digest b)
+        {
+            return a._ab == b._ab && a._cd == b._cd;
+        }
+
+
+        /// <summary>
+        /// Returns true if both <see cref="Md5Digest"/> operands do not have the same value.
+        /// </summary>
+        public static bool operator !=(Md5Digest a, Md5Digest b)
+        {
+            return !(a._ab == b._ab && a._cd == b._cd);
+        }
+
+        /// <summary>
+        /// Returns true if <paramref name="other"/> has the same value as the current <see cref="Md5Digest"/>.
+        /// </summary>
+        public bool Equals(Md5Digest other)
+        {
+            return this == other;
+        }
+
+        /// <summary>
+        /// Returns true if <paramref name="obj"/> is a <see cref="Md5Digest"/> and has the same value as the current <see cref="Md5Digest"/>.
+        /// </summary>
+        public override bool Equals(object obj)
+        {
+            return obj is Md5Digest && Equals((Md5Digest)obj);
+        }
+
+        /// <summary>
+        /// Returns the first 32-bits of the hash as a signed integer.
+        /// </summary>
+        public override int GetHashCode()
+        {
+            return (int)A;
         }
     }
 
