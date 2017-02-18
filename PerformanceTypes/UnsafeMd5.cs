@@ -1,17 +1,34 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace PerformanceTypes
 {
-    [StructLayout(LayoutKind.Sequential)]
+    /// <summary>
+    /// Represents the result of an MD5 hash operation.
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit, Size = 16)]
+    [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Local")]
     public struct Md5Digest
     {
-        public uint A;
-        public uint B;
-        public uint C;
-        public uint D;
+        [FieldOffset(0)] internal uint A;
+        [FieldOffset(4)] internal uint B;
+        [FieldOffset(8)] internal uint C;
+        [FieldOffset(12)] internal uint D;
+        
+        [FieldOffset(0)] ulong _ab;
+        [FieldOffset(8)] ulong _cd;
 
+        /// <summary>
+        /// The size of an <see cref="Md5Digest"/> struct (in bytes).
+        /// </summary>
+        public static int Size => 16;
+
+        /// <summary>
+        /// Returns the raw bytes from the struct. Note that <see cref="Md5Digest"/> is primarily intended to be used in unsafe context where you can simply
+        /// take the address of the struct to get a byte pointer. This method will cause an allocation on the managed heap.
+        /// </summary>
         public unsafe byte[] GetBytes()
         {
             var md5 = this;
@@ -26,8 +43,47 @@ namespace PerformanceTypes
 
             return bytes;
         }
+
+        /// <summary>
+        /// Writes the raw bytes from the digest into a byte buffer. The buffer must have at least 16 bytes available starting at <paramref name="index"/>. An
+        /// exception is thrown when there are not enough bytes remaining.
+        /// </summary>
+        /// <param name="buffer">The buffer to write to.</param>
+        /// <param name="index">The index </param>
+        /// <returns>Always returns 16 (the number of bytes written).</returns>
+        public unsafe int WriteBytes(byte[] buffer, int index = 0)
+        {
+            if (buffer == null)
+                throw new ArgumentNullException(nameof(buffer));
+
+            if (index + Size > buffer.Length)
+                throw new InvalidOperationException($"Buffer is not large enough to write 16 bytes at index {index}. Length = {buffer.Length}");
+
+            fixed (byte* ptr = buffer)
+            {
+                return WriteBytes(ptr);
+            }
+        }
+
+        /// <summary>
+        /// Writes the raw bytes from the digest into a byte buffer. The buffer must have at least 16 bytes available.
+        /// </summary>
+        /// <param name="buffer">The buffer to write to.</param>
+        /// <returns>Always returns 16 (the number of bytes written).</returns>
+        public unsafe int WriteBytes(byte* buffer)
+        {
+            var longPtr = (ulong*)buffer;
+
+            longPtr[0] = _ab;
+            longPtr[1] = _cd;
+
+            return Size;
+        }
     }
 
+    /// <summary>
+    /// A collection of methods for calculating the MD5 of byte arrays without performing any managed heap allocations.
+    /// </summary>
     public static class UnsafeMd5
     {
         [StructLayout(LayoutKind.Sequential)]
@@ -79,10 +135,14 @@ namespace PerformanceTypes
         /// <returns>A struct representing the MD5 digest. This struct is 16 bytes.</returns>
         public static unsafe Md5Digest CalculateHash(byte[] input)
         {
+            var digest = default(Md5Digest);
+
             fixed (byte* ptr = input)
             {
-                return CalculateHash(ptr, input.Length);
+                CalculateHash(ptr, input.Length, &digest);
             }
+
+            return digest;
         }
 
         /// <summary>
@@ -91,18 +151,16 @@ namespace PerformanceTypes
         /// </summary>
         /// <param name="input">The input (byte array) to hash.</param>
         /// <param name="length">The length of the input in bytes.</param>
-        /// <returns>A struct representing the MD5 digest. This struct is 16 bytes.</returns>
-        public static unsafe Md5Digest CalculateHash(byte* input, int length)
+        /// <param name="digest">The result of the hash function.</param>
+        public static unsafe void CalculateHash(byte* input, int length, Md5Digest* digest)
         {
             const int bytesPerBlock = 64;
             var blocksCount = (length + 8) / bytesPerBlock + 1;
 
-            var result = default(Md5Digest);
-
-            result.A = 0x67452301;
-            result.B = 0xefcdab89;
-            result.C = 0x98badcfe;
-            result.D = 0x10325476;
+            digest->A = 0x67452301;
+            digest->B = 0xefcdab89;
+            digest->C = 0x98badcfe;
+            digest->D = 0x10325476;
 
             var paddingBlockData = default(Block);
 
@@ -152,10 +210,10 @@ namespace PerformanceTypes
                     blockPtr = (uint*)&input[offset];
                 }
 
-                var a = result.A;
-                var b = result.B;
-                var c = result.C;
-                var d = result.D;
+                var a = digest->A;
+                var b = digest->B;
+                var c = digest->C;
+                var d = digest->D;
 
                 for (var i = 0; i < bytesPerBlock; i++)
                 {
@@ -194,13 +252,11 @@ namespace PerformanceTypes
                     a = dTemp;
                 }
 
-                result.A += a;
-                result.B += b;
-                result.C += c;
-                result.D += d;
+                digest->A += a;
+                digest->B += b;
+                digest->C += c;
+                digest->D += d;
             }
-
-            return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
