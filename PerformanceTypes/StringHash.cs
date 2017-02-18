@@ -11,6 +11,9 @@ namespace PerformanceTypes
         const uint FNV_PRIME = 16777619;
         const uint FNV_OFFSET_BASIS = 2166136261;
 
+        /// <summary>
+        /// The resulting value of the hash.
+        /// </summary>
         public uint Value { get; private set; }
 
         /// <summary>
@@ -72,6 +75,12 @@ namespace PerformanceTypes
             return hash;
         }
 
+        /// <summary>
+        /// Returns a calculated StringHash for <paramref name="count"/> chars pointed to by <paramref name="chars"/>.
+        /// </summary>
+        /// <param name="chars">A pointer to a character array.</param>
+        /// <param name="count">The number of characters to hash.</param>
+        /// <returns></returns>
         public static unsafe StringHash GetHash(char* chars, int count)
         {
             var end = chars + count;
@@ -97,26 +106,43 @@ namespace PerformanceTypes
                 throw new Exception($"Start ({start}) plus length ({count}) arguments must be less than or equal to buffer.Length ({bufferLength}).");
         }
 
+        /// <summary>
+        /// Returns true if both StringHash operands have the same value.
+        /// </summary>
         public static bool operator ==(StringHash a, StringHash b)
         {
             return a.Value == b.Value;
         }
 
+
+        /// <summary>
+        /// Returns true if both StringHash operands do not have the same value.
+        /// </summary>
         public static bool operator !=(StringHash a, StringHash b)
         {
             return a.Value != b.Value;
         }
 
+        /// <summary>
+        /// Returns true if <paramref name="other"/> has the same value as the current StringHash.
+        /// </summary>
         public bool Equals(StringHash other)
         {
             return this == other;
         }
 
+        /// <summary>
+        /// Returns true if <paramref name="obj"/> is a Stringhash and has the same value as the current StringHash.
+        /// </summary>
         public override bool Equals(object obj)
         {
             return obj is StringHash && Equals((StringHash)obj);
         }
 
+        /// <summary>
+        /// Calls GetHashCode() on <see cref="Value"/> and returns the result. Note, this value will not be the string hash. It will be a hash of the string
+        /// hash.
+        /// </summary>
         public override int GetHashCode()
         {
             return Value.GetHashCode();
