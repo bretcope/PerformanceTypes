@@ -546,6 +546,9 @@ namespace PerformanceTypes
                 Grow(newEnd);
 
             _endPosition = newEnd;
+
+            if (_realPosition > newEnd)
+                _realPosition = newEnd;
         }
 
         /// <summary>
