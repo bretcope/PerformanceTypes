@@ -483,7 +483,7 @@ namespace PerformanceTypes
             int bytesWritten;
             fixed (byte* dataPtr = data)
             {
-                bytesWritten = encoding.GetBytes(chars, count, dataPtr, data.Length - info.StringPos);
+                bytesWritten = encoding.GetBytes(chars, count, &dataPtr[info.StringPos], data.Length - info.StringPos);
             }
 
             WriteVarIntImpl((ulong)bytesWritten, info.VarIntByteCount, info.VarIntPos);
