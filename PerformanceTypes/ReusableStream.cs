@@ -257,7 +257,7 @@ namespace PerformanceTypes
                 {
                     fixed (byte* dataPtr = Data)
                     {
-                        Unsafe.MemoryCopy(dataPtr, buffer, readCount);
+                        Unsafe.MemoryCopy(&dataPtr[pos], buffer, readCount);
                     }
                 }
 
@@ -302,7 +302,7 @@ namespace PerformanceTypes
             {
                 fixed (byte* dataPtr = Data)
                 {
-                    Unsafe.MemoryCopy(buffer, dataPtr, count);
+                    Unsafe.MemoryCopy(buffer, &dataPtr[pos], count);
                 }
             }
 
