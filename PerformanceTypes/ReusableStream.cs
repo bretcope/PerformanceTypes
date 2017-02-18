@@ -566,7 +566,7 @@ namespace PerformanceTypes
         byte[] Grow(int minimumSize)
         {
             if (!CanGrow)
-                throw new InvalidOperationException($"ReusableStream cannot grow to the required size ({minimumSize}) because CanGrow is false");
+                throw new IndexOutOfRangeException($"ReusableStream cannot grow to the required size ({minimumSize}) because CanGrow is false");
 
             if (minimumSize < 0)
                 throw new ArgumentOutOfRangeException(nameof(minimumSize));
