@@ -69,7 +69,7 @@ namespace PerformanceTypes
         /// </summary>
         public long Capacity => Data.LongLength - Offset;
         /// <summary>
-        /// The total readable/writable length of the stream.
+        /// The total length of the stream (bytes written).
         /// </summary>
         public override long Length => _endPosition - Offset;
         /// <summary>
@@ -132,7 +132,10 @@ namespace PerformanceTypes
         /// </summary>
         /// <param name="data">The array where data will be stored.</param>
         /// <param name="offset">The offset into data which represents Position = 0 for the stream.</param>
-        /// <param name="length">The number of bytes after offset which represents meaningful data for the stream.</param>
+        /// <param name="length">
+        /// The number of bytes after offset which represents meaningful data for the stream. Note: this value only affects reading. When writing, this length
+        /// may be exceeded.
+        /// </param>
         /// <param name="canGrow">True to allow the underlying data array to be automatically replaced when additional capacity is needed.</param>
         public ReusableStream(byte[] data, int offset, int length, bool canGrow = false)
         {
@@ -144,7 +147,10 @@ namespace PerformanceTypes
         /// </summary>
         /// <param name="data">The replacement data array.</param>
         /// <param name="offset">The offset into data which represents Position = 0 for the stream.</param>
-        /// <param name="length">The number of bytes after offset which represents meaningful data for the stream.</param>
+        /// <param name="length">
+        /// The number of bytes after offset which represents meaningful data for the stream. Note: this value only affects reading. When writing, this length
+        /// may be exceeded.
+        /// </param>
         /// <param name="canGrow">True to allow the underlying data array to be automatically replaced when additional capacity is needed.</param>
         public void ReplaceData(byte[] data, int offset, int length, bool canGrow = false)
         {
