@@ -5,6 +5,9 @@ using System.Text;
 
 namespace PerformanceTypes
 {
+    /// <summary>
+    /// Defines options for string-interning.
+    /// </summary>
     public struct StringSetOptions
     {
         /// <summary>
@@ -18,7 +21,7 @@ namespace PerformanceTypes
         public int MaxEncodedSizeToLookupInSet { get; set; }
         /// <summary>
         /// NEVER use this option when reading user-provided or arbitrary input, unless you plan to recycle the StringSet (allow it to be garbage collected).
-        /// Failing to follow that advice could lead to unbounded memory growth. If is recommended that you avoid this option unless you understand the
+        /// Failing to follow that advice could lead to unbounded memory growth. It is recommended that you avoid this option unless you understand the
         /// implications and risks.
         /// Does not allocate a new string if it already exists in the StringSet. Newly allocated strings are automatically added to the StringSet.
         /// Only applies to strings whose encoded size is less than MaxEncodedSizeToLookupInSet (in bytes).
@@ -26,23 +29,56 @@ namespace PerformanceTypes
         public bool PerformDangerousAutoAddToSet { get; set; }
     }
 
+    /// <summary>
+    /// A stream implementation where the underlying data (a byte array) can be swapped out, and the stream can be reset for re-reading or writing.
+    /// </summary>
     public partial class ReusableStream : Stream
     {
-        int _realPosition; // offset + position
+        /// <summary>
+        /// The current index into <see cref="Data"/>. It is equal to <see cref="Offset"/> plus <see cref="Position"/>.
+        /// </summary>
+        int _realPosition;
         int _endPosition;  // offset + length used
 
         StringSetOptions _defaultStringSetOptions;
 
+        /// <summary>
+        /// The underlying data for the stream. To replace this underlying data, call <see cref="ReplaceData"/>.
+        /// </summary>
         public byte[] Data { get; private set; }
+        /// <summary>
+        /// True if the stream can automatically resize 
+        /// </summary>
         public bool CanGrow { get; private set; }
 
+        /// <summary>
+        /// True if the stream can be read from.
+        /// </summary>
         public override bool CanRead => true;
+        /// <summary>
+        /// True if the stream can seek to a random byte location.
+        /// </summary>
         public override bool CanSeek => true;
+        /// <summary>
+        /// True if the stream can be written to.
+        /// </summary>
         public override bool CanWrite => true;
 
+        /// <summary>
+        /// The total size that the stream could grow to without needing to resize its underlying data array.
+        /// </summary>
         public long Capacity => Data.LongLength - Offset;
+        /// <summary>
+        /// The total readable/writable length of the stream.
+        /// </summary>
         public override long Length => _endPosition - Offset;
+        /// <summary>
+        /// The offset into data which represents Position = 0 for the stream.
+        /// </summary>
         public int Offset { get; private set; }
+        /// <summary>
+        /// The number of bytes which can be read before reaching the end of the stream.
+        /// </summary>
         public int UnreadByteCount => _endPosition - _realPosition;
 
         /// <summary>
@@ -55,6 +91,9 @@ namespace PerformanceTypes
         /// </summary>
         public StringSet StringSet { get; set; }
 
+        /// <summary>
+        /// The current byte position of the stream. This value is not necessarily the same as the current index of the underlying data.
+        /// </summary>
         public override long Position
         {
             get { return _realPosition - Offset; }
@@ -143,11 +182,19 @@ namespace PerformanceTypes
         }
 
         // not exposing this as a property because it's a struct and would likely cause surprising behavior to some users
+        /// <summary>
+        /// Gets the current default <see cref="StringSetOptions"/>. This controls interning for strings read from the stream. Any updates to these options
+        /// must be applied by calling <see cref="SetDefaultStringSetOptions"/>.
+        /// </summary>
         public StringSetOptions GetDefaultStringSetOptions()
         {
             return _defaultStringSetOptions;
         }
 
+        /// <summary>
+        /// Sets the default <see cref="StringSetOptions"/>, which controls interning for strings read from the stream.
+        /// </summary>
+        /// <param name="options"></param>
         public void SetDefaultStringSetOptions(StringSetOptions options)
         {
             _defaultStringSetOptions = options;
@@ -160,6 +207,13 @@ namespace PerformanceTypes
         {
         }
 
+        /// <summary>
+        /// Reads, at most, <paramref name="count"/> bytes from the stream and copies them into <paramref name="buffer"/> at index <paramref name="offset"/>.
+        /// </summary>
+        /// <param name="buffer">The destination to copy bytes to.</param>
+        /// <param name="offset">The index in the destination buffer where the stream bytes should be copied to.</param>
+        /// <param name="count">The maximum number of bytes to read from the stream. Fewer bytes will be read and copied if the stream has fewer unread bytes remaining.</param>
+        /// <returns>The number of bytes actually read from the stream and copied.</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
             var readCount = Math.Min(count, UnreadByteCount);
@@ -175,7 +229,7 @@ namespace PerformanceTypes
         }
 
         /// <summary>
-        /// Copies, at most, <paramref name="count"/> from the stream to the unmanaged buffer.
+        /// Reads, at most, <paramref name="count"/> from the stream and copies them to the unmanaged buffer.
         /// </summary>
         /// <param name="buffer">A pointer to an unmanaged buffer. </param>
         /// <param name="count">The maximum number of bytes to copy from the stream to the buffer.</param>
@@ -207,6 +261,12 @@ namespace PerformanceTypes
             return readCount;
         }
 
+        /// <summary>
+        /// Reads <paramref name="count"/> bytes from <paramref name="buffer"/> starting at index <paramref name="offset"/> and writes them to the stream.
+        /// </summary>
+        /// <param name="buffer">The buffer to read from.</param>
+        /// <param name="offset">The index into buffer where to start reading from.</param>
+        /// <param name="count">The number of bytes to write to the stream.</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
             int pos, newPos;
@@ -217,6 +277,11 @@ namespace PerformanceTypes
             UpdateWritePosition(newPos);
         }
 
+        /// <summary>
+        /// Reads <paramref name="count"/> bytes from <paramref name="buffer"/> and writes them to the stream.
+        /// </summary>
+        /// <param name="buffer">The buffer to read from.</param>
+        /// <param name="count">The number of bytes to write to the stream.</param>
         public unsafe void Write(byte* buffer, int count)
         {
             int pos, newPos;
@@ -238,6 +303,9 @@ namespace PerformanceTypes
             UpdateWritePosition(newPos);
         }
 
+        /// <summary>
+        /// Writes a single byte to the stream.
+        /// </summary>
         public override void WriteByte(byte value)
         {
             int pos, newPos;
@@ -248,6 +316,10 @@ namespace PerformanceTypes
             UpdateWritePosition(newPos);
         }
 
+        /// <summary>
+        /// Reads one byte from the stream and returns it. If there are no bytes remaining to read, -1 is returned. This behavior is as per the .NET Stream
+        /// documentation. If this is not the behavior you're looking for, consider using <see cref="ReadUInt8"/> instead.
+        /// </summary>
         public override int ReadByte()
         {
             if (UnreadByteCount < 1)
@@ -272,6 +344,9 @@ namespace PerformanceTypes
             return value;
         }
 
+        /// <summary>
+        /// Writes two bytes from <paramref name="src"/> to the stream.
+        /// </summary>
         public unsafe void WriteTwoBytes(byte* src)
         {
             int pos, newPos;
@@ -284,6 +359,9 @@ namespace PerformanceTypes
             UpdateWritePosition(newPos);
         }
 
+        /// <summary>
+        /// Writes four bytes from <paramref name="src"/> to the stream.
+        /// </summary>
         public unsafe void WriteFourBytes(byte* src)
         {
             int pos, newPos;
@@ -298,6 +376,9 @@ namespace PerformanceTypes
             UpdateWritePosition(newPos);
         }
 
+        /// <summary>
+        /// Writes eight bytes from <paramref name="src"/> to the stream.
+        /// </summary>
         public unsafe void WriteEightBytes(byte* src)
         {
             int pos, newPos;
@@ -316,6 +397,9 @@ namespace PerformanceTypes
             UpdateWritePosition(newPos);
         }
 
+        /// <summary>
+        /// Reads two bytes from the stream and copies them to <paramref name="dest"/>.
+        /// </summary>
         public unsafe void ReadTwoBytes(byte* dest)
         {
             if (UnreadByteCount < 2)
@@ -330,6 +414,9 @@ namespace PerformanceTypes
             _realPosition = pos + 2;
         }
 
+        /// <summary>
+        /// Reads four bytes from the stream and copies them to <paramref name="dest"/>.
+        /// </summary>
         public unsafe void ReadFourBytes(byte* dest)
         {
             if (UnreadByteCount < 4)
@@ -345,7 +432,10 @@ namespace PerformanceTypes
 
             _realPosition = pos + 4;
         }
-        
+
+        /// <summary>
+        /// Reads eight bytes from the stream and copies them to <paramref name="dest"/>.
+        /// </summary>
         public unsafe void ReadEightBytes(byte* dest)
         {
             if (UnreadByteCount < 8)
@@ -411,6 +501,9 @@ namespace PerformanceTypes
             return value;
         }
 
+        /// <summary>
+        /// Sets the current index of the stream. This will not necessarily correspond with the index of the underlying data.
+        /// </summary>
         public override long Seek(long offset, SeekOrigin origin)
         {
             switch (origin)

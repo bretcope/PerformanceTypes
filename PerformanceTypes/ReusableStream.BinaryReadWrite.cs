@@ -5,21 +5,33 @@ namespace PerformanceTypes
 {
     public partial class ReusableStream
     {
+        /// <summary>
+        /// Writes a boolean value as a single byte with the value 0 (false) or 1 (true).
+        /// </summary>
         public void Write(bool value)
         {
             WriteByte((byte)(value ? 1 : 0));
         }
 
+        /// <summary>
+        /// Reads a single byte and treats it as a boolean value. 1 is interpreted as true. All other values are interpreted as false.
+        /// </summary>
         public bool ReadBoolean()
         {
             return ReadUInt8() == 1;
         }
 
+        /// <summary>
+        /// Writes a char to the stream (two bytes). Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe void Write(char value)
         {
             WriteTwoBytes((byte*)&value);
         }
 
+        /// <summary>
+        /// Reads a char from the stream (two bytes). Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe char ReadChar()
         {
             char ch;
@@ -27,31 +39,49 @@ namespace PerformanceTypes
             return ch;
         }
 
+        /// <summary>
+        /// Writes a signed byte to the stream.
+        /// </summary>
         public void Write(sbyte value)
         {
             WriteByte((byte)value);
         }
 
+        /// <summary>
+        /// Reads a signed byte from the stream.
+        /// </summary>
         public sbyte ReadInt8()
         {
             return (sbyte)ReadOneByte();
         }
 
+        /// <summary>
+        /// Writes a byte to the stream.
+        /// </summary>
         public void Write(byte value)
         {
             WriteByte(value);
         }
 
+        /// <summary>
+        /// Reads a byte from the stream.
+        /// </summary>
         public byte ReadUInt8()
         {
             return ReadOneByte();
         }
 
+        /// <summary>
+        /// Writes a short (two bytes) to the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe void Write(short value)
         {
             WriteTwoBytes((byte*)&value);
         }
 
+        /// <summary>
+        /// Reads a short (two bytes) from the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe short ReadInt16()
         {
             short value;
@@ -59,11 +89,17 @@ namespace PerformanceTypes
             return value;
         }
 
+        /// <summary>
+        /// Writes an unsigned short (two bytes) to the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe void Write(ushort value)
         {
             WriteTwoBytes((byte*)&value);
         }
 
+        /// <summary>
+        /// Reads an unsigned short (two bytes) from the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe ushort ReadUInt16()
         {
             ushort value;
@@ -71,11 +107,17 @@ namespace PerformanceTypes
             return value;
         }
 
+        /// <summary>
+        /// Writes an int (four bytes) to the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe void Write(int value)
         {
             WriteFourBytes((byte*)&value);
         }
 
+        /// <summary>
+        /// Reads an int (four bytes) from the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe int ReadInt32()
         {
             int value;
@@ -83,11 +125,17 @@ namespace PerformanceTypes
             return value;
         }
 
+        /// <summary>
+        /// Writes an unsigned int (four bytes) to the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe void Write(uint value)
         {
             WriteFourBytes((byte*)&value);
         }
 
+        /// <summary>
+        /// Reads an unsigned int (four bytes) from the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe uint ReadUInt32()
         {
             uint value;
@@ -95,11 +143,17 @@ namespace PerformanceTypes
             return value;
         }
 
+        /// <summary>
+        /// Writes a long (eight bytes) to the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe void Write(long value)
         {
             WriteEightBytes((byte*)&value);
         }
 
+        /// <summary>
+        /// Reads a long (eight bytes) from the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe long ReadInt64()
         {
             long value;
@@ -107,11 +161,17 @@ namespace PerformanceTypes
             return value;
         }
 
+        /// <summary>
+        /// Writes an unsigned long (eight bytes) to the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe void Write(ulong value)
         {
             WriteEightBytes((byte*)&value);
         }
 
+        /// <summary>
+        /// Reads an unsigned long (eight bytes) from the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe ulong ReadUInt64()
         {
             ulong value;
@@ -119,11 +179,17 @@ namespace PerformanceTypes
             return value;
         }
 
+        /// <summary>
+        /// Writes a float (four bytes) to the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe void Write(float value)
         {
             WriteFourBytes((byte*)&value);
         }
 
+        /// <summary>
+        /// Reads a float (four bytes) from the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe float ReadSingle()
         {
             float value;
@@ -131,11 +197,17 @@ namespace PerformanceTypes
             return value;
         }
 
+        /// <summary>
+        /// Writes a double (eight bytes) to the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe void Write(double value)
         {
             WriteEightBytes((byte*)&value);
         }
 
+        /// <summary>
+        /// Reads a double (eight bytes) from the stream. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe double ReadDouble()
         {
             double value;
@@ -143,12 +215,20 @@ namespace PerformanceTypes
             return value;
         }
 
+        /// <summary>
+        /// Calls ToBinary() on the value and writes the returned long (eight bytes). Uses the endianness of the current architecture.
+        /// </summary>
+        /// <param name="value"></param>
         public unsafe void Write(DateTime value)
         {
             var int64 = value.ToBinary();
             WriteEightBytes((byte*)&int64);
         }
 
+        /// <summary>
+        /// Reads eight bytes from the stream and generates a DateTime by calling DateTime.FromBinary. Uses the endianness of the current architecture.
+        /// </summary>
+        /// <returns></returns>
         public unsafe DateTime ReadDateTime()
         {
             long int64;
@@ -156,18 +236,34 @@ namespace PerformanceTypes
             return DateTime.FromBinary(int64);
         }
 
+        /// <summary>
+        /// Writes a Guid to the stream based on the raw bytes of the struct. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe void Write(Guid value)
         {
             Write((byte*)&value, sizeof(Guid));
         }
 
+        /// <summary>
+        /// Reads 16 bytes from the stream and treats them as a Guid struct. Uses the endianness of the current architecture.
+        /// </summary>
         public unsafe Guid ReadGuid()
         {
+            if (UnreadByteCount < sizeof(Guid))
+                throw new IndexOutOfRangeException();
+
             Guid guid;
             Read((byte*)&guid, sizeof(Guid));
             return guid;
         }
 
+        /// <summary>
+        /// Reads a length-prefixed string from the stream.
+        /// </summary>
+        /// <param name="nullable">True if the string can be null.</param>
+        /// <param name="encoding">The encoding to use. If null, the ReusableStream's <see cref="DefaultEncoding"/> will be used.</param>
+        /// <param name="setOptions">The string interning options to use. If null, the ReusableStream's default options will be used.</param>
+        /// <returns>The string read from the stream.</returns>
         public unsafe string ReadString(bool nullable, Encoding encoding = null, StringSetOptions? setOptions = null)
         {
             var encodedSize = (int)ReadVarUInt();
@@ -225,6 +321,12 @@ namespace PerformanceTypes
             }
         }
 
+        /// <summary>
+        /// Writes a length-prefixed string to the stream.
+        /// </summary>
+        /// <param name="s">The string to write.</param>
+        /// <param name="nullable">True if the string is nullable.</param>
+        /// <param name="encoding">The encoding to use. If null, the ReusableStream's <see cref="DefaultEncoding"/> will be used.</param>
         public void WriteString(string s, bool nullable, Encoding encoding = null)
         {
             if (s == null)
@@ -265,6 +367,14 @@ namespace PerformanceTypes
             UpdateWritePosition(info.StringPos + bytesWritten);
         }
 
+        /// <summary>
+        /// Writes a length-prefixed string to the stream.
+        /// </summary>
+        /// <param name="chars">The string to write.</param>
+        /// <param name="offset">The index into <paramref name="chars"/> where the string starts.</param>
+        /// <param name="count">The length of the string (in chars).</param>
+        /// <param name="nullable">True if the string is nullable.</param>
+        /// <param name="encoding">The encoding to use. If null, the ReusableStream's <see cref="DefaultEncoding"/> will be used.</param>
         public void WriteString(char[] chars, int offset, int count, bool nullable, Encoding encoding = null)
         {
             if (chars == null)
@@ -314,6 +424,13 @@ namespace PerformanceTypes
             UpdateWritePosition(info.StringPos + bytesWritten);
         }
 
+        /// <summary>
+        /// Writes a length-prefixed string to the stream.
+        /// </summary>
+        /// <param name="chars">The string to write.</param>
+        /// <param name="count">The length of the string (in chars).</param>
+        /// <param name="nullable">True if the string is nullable.</param>
+        /// <param name="encoding">The encoding to use. If null, the ReusableStream's <see cref="DefaultEncoding"/> will be used.</param>
         public unsafe void WriteString(char* chars, int count, bool nullable, Encoding encoding = null)
         {
             if (chars == null)
