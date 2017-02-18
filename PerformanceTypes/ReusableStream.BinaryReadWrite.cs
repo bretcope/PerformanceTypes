@@ -6,6 +6,15 @@ namespace PerformanceTypes
     public partial class ReusableStream
     {
         /// <summary>
+        /// Reads all bytes from <paramref name="buffer"/> and writes them to the stream.
+        /// </summary>
+        /// <param name="buffer">The buffer to read from.</param>
+        public void Write(byte[] buffer)
+        {
+            Write(buffer, 0, buffer.Length);
+        }
+
+        /// <summary>
         /// Writes a boolean value as a single byte with the value 0 (false) or 1 (true).
         /// </summary>
         public void Write(bool value)
