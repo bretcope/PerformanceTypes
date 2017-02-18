@@ -79,7 +79,7 @@ namespace PerformanceTypes.Tests
 
                     fixed (byte* ptr = input)
                     {
-                        UnsafeMd5.CalculateHash(ptr, input.Length, &digest);
+                        UnsafeMd5.ComputeHash(ptr, input.Length, &digest);
                     }
 
                     AssertDigestsAreEqual(input, expected, ref digest);

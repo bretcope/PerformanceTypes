@@ -174,13 +174,13 @@ namespace PerformanceTypes
         /// </summary>
         /// <param name="input">The byte array to hash.</param>
         /// <returns>A struct representing the MD5 digest. This struct is 16 bytes.</returns>
-        public static unsafe Md5Digest CalculateHash(byte[] input)
+        public static unsafe Md5Digest ComputeHash(byte[] input)
         {
             var digest = default(Md5Digest);
 
             fixed (byte* ptr = input)
             {
-                CalculateHash(ptr, input.Length, &digest);
+                ComputeHash(ptr, input.Length, &digest);
             }
 
             return digest;
@@ -193,7 +193,7 @@ namespace PerformanceTypes
         /// <param name="input">The input (byte array) to hash.</param>
         /// <param name="length">The length of the input in bytes.</param>
         /// <param name="digest">The result of the hash function.</param>
-        public static unsafe void CalculateHash(byte* input, int length, Md5Digest* digest)
+        public static unsafe void ComputeHash(byte* input, int length, Md5Digest* digest)
         {
             const int bytesPerBlock = 64;
             var blocksCount = (length + 8) / bytesPerBlock + 1;
