@@ -42,6 +42,11 @@ namespace PerformanceTypes
         }
 
         /// <summary>
+        /// Gets the total elapsed time that the stopwatch has run. This property is accurate, even while the stopwatch is running.
+        /// </summary>
+        public TimeSpan Elapsed => TimeSpan.FromMilliseconds(GetElapsedMilliseconds());
+
+        /// <summary>
         /// Starts the stopwatch by marking the start time.
         /// </summary>
         public void Start()
@@ -71,7 +76,7 @@ namespace PerformanceTypes
         }
 
         /// <summary>
-        /// Returns the total number of milliseconds that the stopwatch has run for.
+        /// Returns the total number of milliseconds that the stopwatch has run for. This property is accurate, even while the stopwatch is running.
         /// </summary>
         public double GetElapsedMilliseconds()
         {
