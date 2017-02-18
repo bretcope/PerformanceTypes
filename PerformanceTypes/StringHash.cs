@@ -26,9 +26,15 @@ namespace PerformanceTypes
         /// <summary>
         /// Allows you to iteratively calculate the hash value, one character at a time.
         /// </summary>
-        public void Iterate(char c)
+        public unsafe void Iterate(char c)
         {
-            Value = unchecked((c ^ Value) * FNV_PRIME);
+            var bytes = (byte*)&c;
+            var v = Value;
+
+            v = unchecked((bytes[0] ^ v) * FNV_PRIME);
+            v = unchecked((bytes[1] ^ v) * FNV_PRIME);
+
+            Value = v;
         }
 
         /// <summary>
