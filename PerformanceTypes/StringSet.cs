@@ -5,6 +5,10 @@ using System.Threading;
 
 namespace PerformanceTypes
 {
+    /// <summary>
+    /// A specialized hash set for storing strings. The primary purpose is to use as an intern pool. Strings can be looked up in the set by hash code, which
+    /// means you can check if a string exists without having to allocate a new string.
+    /// </summary>
     public class StringSet : IReadOnlyCollection<string>
     {
         struct Slot
@@ -14,6 +18,9 @@ namespace PerformanceTypes
             internal int Next;
         }
 
+        /// <summary>
+        /// A cursor to a linked-list of strings. It provides a way to iterate over strings in <see cref="StringSet"/> which share the same hash value.
+        /// </summary>
         public struct StringSearchCursor
         {
             internal object Slots;
@@ -87,6 +94,9 @@ namespace PerformanceTypes
             _data = new BucketsAndSlots(new int[initialSize], new Slot[initialSize], 0);
         }
 
+        /// <summary>
+        /// Returns an enumerator for all strings in the set.
+        /// </summary>
         public IEnumerator<string> GetEnumerator()
         {
             var slots = _data.Slots;
@@ -185,6 +195,14 @@ namespace PerformanceTypes
             }
         }
 
+        /// <summary>
+        /// Adds a string to the set if it does not already exist.
+        /// </summary>
+        /// <param name="chars">A pointer to the string you want to add.</param>
+        /// <param name="count">The length of the string (in chars).</param>
+        /// <param name="str">The string object representation of the characters. A new string is only allocated when it does not already exist in the set.</param>
+        /// <param name="knownHashValue">(optional) If the StringHash has already been calculated, you can provide it here to save re-calculation.</param>
+        /// <returns>True if the string was added. False if the string already existed in the set.</returns>
         public unsafe bool Add(char* chars, int count, out string str, StringHash knownHashValue = default(StringHash))
         {
             if (knownHashValue == default(StringHash))
@@ -231,6 +249,13 @@ namespace PerformanceTypes
             return GetExistingStringImpl(buffer, start, count, knownHashValue);
         }
 
+        /// <summary>
+        /// Uses the characters from a buffer to check whether a string exists in the set, and retrieve it if so.
+        /// </summary>
+        /// <param name="chars">A pointer to the string to search for.</param>
+        /// <param name="count">The length of the string (in chars).</param>
+        /// <param name="knownHashValue">(optional) If the StringHash has already been calculated, you can provide it here to save re-calculation.</param>
+        /// <returns>If found in the set, the existing string is returned. If not found, null is returned.</returns>
         public unsafe string GetExistingString(char* chars, int count, StringHash knownHashValue = default(StringHash))
         {
             if (knownHashValue == default(StringHash))

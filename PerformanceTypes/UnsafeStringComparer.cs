@@ -2,6 +2,10 @@
 
 namespace PerformanceTypes
 {
+    /// <summary>
+    /// Provides string comparison methods. The purpose is to be able to easily compare a string to a character array (or pointer) without needing to allocate
+    /// a string.
+    /// </summary>
     public static class UnsafeStringComparer
     {
         /// <summary>

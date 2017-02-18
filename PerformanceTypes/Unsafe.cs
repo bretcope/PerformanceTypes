@@ -1,14 +1,17 @@
 ﻿namespace PerformanceTypes
 {
+    /// <summary>
+    /// Unsafe memory utilities.
+    /// </summary>
     public static class Unsafe
     {
         /// <summary>
         /// This method is not a general-purpose replacement for memcpy or Marshal.Copy, however, it will generally out-perform those methods for byte lengths
         /// of around 400 or less.
         /// </summary>
-        /// <param name="src"></param>
-        /// <param name="dest"></param>
-        /// <param name="count"></param>
+        /// <param name="src">Buffer to copy from.</param>
+        /// <param name="dest">Buffer to copy to.</param>
+        /// <param name="count">Number of bytes to copy.</param>
         public static unsafe void MemoryCopy(byte* src, byte* dest, int count)
         {
             var remainder = count;
