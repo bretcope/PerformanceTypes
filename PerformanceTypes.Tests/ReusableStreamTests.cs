@@ -748,12 +748,16 @@ Proin fringilla pellentesque odio. Sed finibus in dolor non laoreet. Mauris in m
             var options = new StringSetOptions();
             options.MaxEncodedSizeToLookupInSet = max;
 
+            Assert.Throws<InvalidOperationException>(() => s.SetDefaultStringSetOptions(options));
+
+            var set = new StringSet(10);
+            s.StringSet = set;
             s.SetDefaultStringSetOptions(options);
+            s.StringSet = null;
 
             // should throw because no StringSet has been provided
             Assert.Throws<InvalidOperationException>(() => s.ReadString(false));
 
-            var set = new StringSet(10);
             foreach (var str in strings)
             {
                 if (str != exclude)

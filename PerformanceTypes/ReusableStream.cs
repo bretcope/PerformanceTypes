@@ -198,11 +198,15 @@ namespace PerformanceTypes
         }
 
         /// <summary>
-        /// Sets the default <see cref="StringSetOptions"/>, which controls interning for strings read from the stream.
+        /// Sets the default <see cref="StringSetOptions"/>, which controls interning for strings read from the stream. If MaxEncodedSizeToLookupInSet is
+        /// greater than zero, then <see cref="StringSet"/> must be non-null.
         /// </summary>
         /// <param name="options"></param>
         public void SetDefaultStringSetOptions(StringSetOptions options)
         {
+            if (options.MaxEncodedSizeToLookupInSet > 0 && StringSet == null)
+                throw new InvalidOperationException("Cannot set MaxEncodedSizeToLookupInSet greater than zero while StringSet is null.");
+
             _defaultStringSetOptions = options;
         }
 
