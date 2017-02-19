@@ -313,7 +313,7 @@ namespace PerformanceTypes
             int charsWritten;
             fixed (byte* dataPtr = data)
             {
-                charsWritten = encoding.GetChars(dataPtr, encodedSize, charBuffer, maxChars);
+                charsWritten = encoding.GetChars(&dataPtr[pos], encodedSize, charBuffer, maxChars);
             }
 
             // now that we've got the characters in a buffer, calculate the hash and see if it exists in the set
