@@ -31,17 +31,18 @@ namespace PerformanceTypes
         /// </summary>
         public unsafe byte[] GetBytes()
         {
-            var md5 = this;
-            var ptr = (byte*)&md5;
-
-            var bytes = new byte[16];
-
-            for (var i = 0; i < 16; i++)
+            fixed (Md5Digest* digestPtr = &this)
             {
-                bytes[i] = ptr[i];
-            }
+                var digestBytePtr = (byte*)digestPtr;
+                var bytes = new byte[16];
 
-            return bytes;
+                for (var i = 0; i < 16; i++)
+                {
+                    bytes[i] = digestBytePtr[i];
+                }
+
+                return bytes;
+            }
         }
 
         /// <summary>
