@@ -121,6 +121,17 @@ namespace PerformanceTypes
         {
             return (int)A;
         }
+
+        /// <summary>
+        /// Returns a hex representation of the digest.
+        /// </summary>
+        public override unsafe string ToString()
+        {
+            fixed (Md5Digest* digestPtr = &this)
+            {
+                return Unsafe.ToHexString((byte*)digestPtr, SIZE);
+            }
+        }
     }
 
     /// <summary>
