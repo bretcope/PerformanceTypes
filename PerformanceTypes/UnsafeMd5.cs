@@ -62,7 +62,7 @@ namespace PerformanceTypes
 
             fixed (byte* ptr = buffer)
             {
-                return WriteBytes(ptr);
+                return WriteBytes(&ptr[index]);
             }
         }
 
