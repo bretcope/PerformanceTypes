@@ -497,8 +497,8 @@ namespace PerformanceTypes
             EnsureRoomFor(2, out pos, out newPos);
 
             var data = Data;
-            data[0] = 0; // first byte indicates zero length
-            data[1] = 1; // second byte = 1 indicates null
+            data[pos] = 0; // first byte indicates zero length
+            data[pos + 1] = 1; // second byte = 1 indicates null
 
             UpdateWritePosition(newPos);
         }
@@ -512,15 +512,15 @@ namespace PerformanceTypes
                 EnsureRoomFor(2, out pos, out newPos);
 
                 var data = Data;
-                data[0] = 0;
-                data[1] = 0;
+                data[pos] = 0;
+                data[pos + 1] = 0;
             }
             else
             {
                 EnsureRoomFor(1, out pos, out newPos);
 
                 var data = Data;
-                data[0] = 0;
+                data[pos] = 0;
             }
 
             UpdateWritePosition(newPos);
