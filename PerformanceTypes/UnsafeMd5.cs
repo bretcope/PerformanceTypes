@@ -174,17 +174,14 @@ namespace PerformanceTypes
         /// Calculates the MD5 hash of the input.
         /// </summary>
         /// <param name="input">The byte array to hash.</param>
-        /// <returns>A struct representing the MD5 digest. This struct is 16 bytes.</returns>
-        public static unsafe Md5Digest ComputeHash(byte[] input)
+        /// <param name="digest">The result of the hash function.</param>
+        public static unsafe void ComputeHash(byte[] input, out Md5Digest digest)
         {
-            var digest = default(Md5Digest);
-
+            fixed (Md5Digest* digestPtr = &digest)
             fixed (byte* ptr = input)
             {
-                ComputeHash(ptr, input.Length, &digest);
+                ComputeHash(ptr, input.Length, digestPtr);
             }
-
-            return digest;
         }
 
         /// <summary>

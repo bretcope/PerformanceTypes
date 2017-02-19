@@ -40,6 +40,23 @@ namespace PerformanceTypes.Tests
         }
 
         [Test]
+        public unsafe void ManagedVsUnmanaged()
+        {
+            var rng = new Random();
+            var input = new byte[100];
+            rng.NextBytes(input);
+
+            Md5Digest managed, unmanaged;
+
+            UnsafeMd5.ComputeHash(input, out managed);
+
+            fixed (byte* inputPtr = input)
+                UnsafeMd5.ComputeHash(inputPtr, input.Length, &unmanaged);
+
+            Assert.AreEqual(managed, unmanaged);
+        }
+
+        [Test]
         public unsafe void GetBytes()
         {
             var creationBytes = new byte[Md5Digest.SIZE];
