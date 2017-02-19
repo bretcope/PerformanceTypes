@@ -292,6 +292,8 @@ namespace PerformanceTypes
             
             if (pos + encodedSize > data.Length)
                 throw new IndexOutOfRangeException();
+            
+            _realPosition = pos + encodedSize;
 
             if (encoding == null)
                 encoding = DefaultEncoding;
@@ -299,10 +301,7 @@ namespace PerformanceTypes
             if (encodedSize > stringSetOptions.MaxEncodedSizeToLookupInSet)
             {
                 // don't care about interning, just read the string
-                var str = encoding.GetString(Data, pos, encodedSize);
-
-                _realPosition = pos + encodedSize;
-                return str;
+                return encoding.GetString(Data, pos, encodedSize);
             }
 
             // we're going to use the StringSet as an intern pool
