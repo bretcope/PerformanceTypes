@@ -69,5 +69,35 @@
                     return;
             }
         }
+
+        /// <summary>
+        /// Returns a hexadecimal string representation of the buffer.
+        /// </summary>
+        /// <param name="buffer">The bytes to convert to a hex string.</param>
+        /// <param name="length">Length of the buffer (in bytes).</param>
+        public static unsafe string ToHexString(byte* buffer, int length)
+        {
+            const int numeric = '0';
+            const int alpha = 'a' - 10;
+
+            var str = new string('0', length * 2);
+            fixed (char* strPtr = str)
+            {
+                var c = strPtr;
+
+                for (var i = 0; i < length; i++)
+                {
+                    var high = buffer[i] >> 4;
+                    *c = (char)(high + (high < 10 ? numeric : alpha));
+                    c++;
+
+                    var low = buffer[i] & 0xf;
+                    *c = (char)(low + (low < 10 ? numeric : alpha));
+                    c++;
+                }
+            }
+
+            return str;
+        }
     }
 }

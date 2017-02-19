@@ -52,6 +52,7 @@
     <Compile Include="StopwatchTests.cs" />
     <Compile Include="StringSetTests.cs" />
     <Compile Include="UnsafeStringComparerTests.cs" />
+    <Compile Include="UnsafeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
