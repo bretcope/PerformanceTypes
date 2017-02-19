@@ -275,6 +275,11 @@ namespace PerformanceTypes
         /// <returns>The string read from the stream.</returns>
         public unsafe string ReadString(bool nullable, Encoding encoding = null, StringSetOptions? setOptions = null)
         {
+            var stringSetOptions = setOptions ?? _defaultStringSetOptions;
+            var set = StringSet;
+            if (stringSetOptions.MaxEncodedSizeToLookupInSet > 0 && set == null)
+                throw new InvalidOperationException("StringSetOptions.MaxEncodedSizeToLookupInSet is greater than zero, but StringSet is null.");
+
             var encodedSize = (int)ReadVarUInt();
 
             if (encodedSize == 0)
@@ -290,10 +295,8 @@ namespace PerformanceTypes
 
             if (encoding == null)
                 encoding = DefaultEncoding;
-
-            var options = setOptions ?? _defaultStringSetOptions;
-
-            if (encodedSize > options.MaxEncodedSizeToLookupInSet)
+            
+            if (encodedSize > stringSetOptions.MaxEncodedSizeToLookupInSet)
             {
                 // don't care about interning, just read the string
                 var str = encoding.GetString(Data, pos, encodedSize);
@@ -303,9 +306,6 @@ namespace PerformanceTypes
             }
 
             // we're going to use the StringSet as an intern pool
-            var set = StringSet;
-            if (set == null)
-                throw new InvalidOperationException("StringSetOptions.MaxEncodedSizeToLookupInSet is greater than zero, but StringSet is null.");
 
             var maxChars = encoding.GetMaxCharCount(encodedSize);
             var charBuffer = stackalloc char[maxChars];
@@ -317,7 +317,7 @@ namespace PerformanceTypes
             }
 
             // now that we've got the characters in a buffer, calculate the hash and see if it exists in the set
-            if (options.PerformDangerousAutoAddToSet)
+            if (stringSetOptions.PerformDangerousAutoAddToSet)
             {
                 string str;
                 set.Add(charBuffer, charsWritten, out str);
