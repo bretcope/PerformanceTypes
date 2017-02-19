@@ -104,6 +104,41 @@ namespace PerformanceTypes.Tests
             }
         }
 
+        [Test]
+        public unsafe void WriteBytes()
+        {
+            var input = new byte[100];
+            var rng = new Random();
+            rng.NextBytes(input);
+
+            Md5Digest digest;
+            UnsafeMd5.ComputeHash(input, out digest);
+
+            var expected = digest.GetBytes();
+
+            var buffer1 = new byte[Md5Digest.SIZE + 2];
+            var buffer2 = new byte[Md5Digest.SIZE + 2];
+
+            fixed (byte* onePtr = buffer1)
+            {
+                digest.WriteBytes(&onePtr[1]);
+                digest.WriteBytes(buffer2, 1);
+            }
+
+            const int end = Md5Digest.SIZE + 1;
+
+            Assert.AreEqual(0, buffer1[0]);
+            Assert.AreEqual(0, buffer2[0]);
+            Assert.AreEqual(0, buffer1[end]);
+            Assert.AreEqual(0, buffer2[end]);
+
+            for (var i = 0; i < Md5Digest.SIZE; i++)
+            {
+                Assert.AreEqual(expected[i], buffer1[i + 1]);
+                Assert.AreEqual(expected[i], buffer2[i + 1]);
+            }
+        }
+
         static unsafe void AssertDigestsAreEqual(byte[] input, byte[] expected, ref Md5Digest actual)
         {
             Assert.AreEqual(Md5Digest.SIZE, expected.Length);
