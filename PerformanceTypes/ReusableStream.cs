@@ -628,7 +628,7 @@ namespace PerformanceTypes
         {
             // Binary search would be O(log n) instead of O(n) for linear search, but most values you would want to write with a VarInt
             // are integers which represent a count of something, and those are going to tend to be low-value integers, so linear should
-            // be pretty good for the 
+            // be better for the common case.
 
             if ((value & ~0x7FUL) == 0)
                 return 1;

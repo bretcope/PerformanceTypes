@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Md5Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReusableStreamTests.cs" />
     <Compile Include="StopwatchTests.cs" />
     <Compile Include="StringSetTests.cs" />
     <Compile Include="UnsafeStringComparerTests.cs" />
