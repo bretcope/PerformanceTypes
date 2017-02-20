@@ -124,9 +124,13 @@ stream.StringSet = set;
 var options = new StringSetOptions();
 
 /*
-For any string whose encoded size (in bytes) is less than or equal to this value, a lookup in StringSet will be performed before allocating a new string. If the string already exists in StringSet, then no allocation occurs. If it does not exist in StringSet, or if its encoded size is larger than this value, then a new string is allocated.
+For any string whose encoded size (in bytes) is less than or equal to this value, a lookup in
+StringSet will be performed before allocating a new string. If the string already exists in
+StringSet, then no allocation occurs. If it does not exist in StringSet, or if its encoded size
+is larger than this value, then a new string is allocated.
 
-For performance reasons, it is recommended to use a small value, such as 256, or less. Use zero to disable StringSet lookups altogether.
+For performance reasons, it is recommended to use a small value, such as 256, or less. Use zero
+to disable StringSet lookups altogether.
 */
 options.MaxEncodedSizeToLookupInSet = 40;
 
@@ -143,7 +147,6 @@ var readString = stream.ReadString(true);
 
 // verify that we got the exact same string object
 object.ReferenceEquals(testString, readString); // true
-
 ```
 
 You can override the default StringSetOptions on each call to ReadString:
