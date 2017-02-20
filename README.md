@@ -12,7 +12,9 @@ This library is a small collection of specialized helper types which primarily f
   - [StringHash](#stringhash)
 - [UnsafeStringComparer](#unsafestringcomparer): A set of string-comparison methods where one or more operands are a char array or pointer.
 - [UnsafeMd5](#unsafemd5): An [MD5](https://en.wikipedia.org/wiki/MD5) hashing implementation which performs zero allocations.
-- [Unsafe.MemoryCopy](#unsafe-memorycopy): A quick alternative to `memcpy` for small data buffers (~400 bytes or less).
+- Unsafe: a small collection of unsafe static utility methods.
+  - [MemoryCopy](#memorycopy): A quick alternative to `memcpy` for small data buffers (~400 bytes or less).
+  - [ToHexString](#tohexstring): Returns the hexadecimal representation of an unmanaged buffer.
 
 ## StopwatchStruct
 
@@ -382,11 +384,27 @@ var hex = digest.ToString(); // example: 1f2cc2829f9ec439fab4f45ab54d8a82
 
 Md5Digest also implements `IEquatable<Md5Digest>` for comparison purposes and offers operator overloads for `==` and `!=`.
 
-## Unsafe.MemoryCopy
+## Unsafe
+
+A small static utilities class for unsafe operations.
+
+### MemoryCopy
 
 This is not a general-purpose replacement for `memcpy` or methods like `Marshal.Copy`. However, it is a fast alternative for small data buffers. In my testing, it will out-perform the alternatives for buffer sizes of around 400 bytes or less.
 
 ```csharp
 Unsafe.MemoryCopy(srcPtr, destPtr, bytesCount);
+```
+
+### ToHexString
+
+Takes an unmanaged byte pointer and length (in bytes), and returns a hexadecimal representation of the data. The string itself is the only heap allocation this method makes. There are no intermediate objects.
+
+```csharp
+var bytes = stackalloc byte[2];
+bytes[0] = 0xa5;
+bytes[1] = 0xf7;
+
+var str = ToHexString(bytes, 2); // "a5f7"
 ```
 
