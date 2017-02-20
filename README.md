@@ -1,5 +1,8 @@
 # Performance Types
 
+[![NuGet version](https://badge.fury.io/nu/PerformanceTypes.svg)](http://badge.fury.io/nu/PerformanceTypes)
+[![Build status](https://ci.appveyor.com/api/projects/status/ielvdv17v6qh2py3?svg=true)](https://ci.appveyor.com/project/bretcope/performancetypes)
+
 This library is a small collection of specialized helper types which primarily focus on reducing allocations compared to BCL alternatives. __This is NOT a general-purpose library__. If you are not concerned with managed heap allocations, you will likely be better off sticking to BCL-provided types and methods.
 
 - [StopwatchStruct](#stopwatchstruct): A value-type implementation of Stopwatch for benchmarking without allocations.
