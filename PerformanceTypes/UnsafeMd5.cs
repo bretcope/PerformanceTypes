@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace PerformanceTypes
@@ -155,26 +154,6 @@ namespace PerformanceTypes
             }
         }
 
-        static readonly uint[] s_sines =
-        {
-            0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
-            0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be, 0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821,
-            0xf61e2562, 0xc040b340, 0x265e5a51, 0xe9b6c7aa, 0xd62f105d, 0x02441453, 0xd8a1e681, 0xe7d3fbc8,
-            0x21e1cde6, 0xc33707d6, 0xf4d50d87, 0x455a14ed, 0xa9e3e905, 0xfcefa3f8, 0x676f02d9, 0x8d2a4c8a,
-            0xfffa3942, 0x8771f681, 0x6d9d6122, 0xfde5380c, 0xa4beea44, 0x4bdecfa9, 0xf6bb4b60, 0xbebfbc70,
-            0x289b7ec6, 0xeaa127fa, 0xd4ef3085, 0x04881d05, 0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665,
-            0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039, 0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1,
-            0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1, 0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391,
-        };
-
-        static readonly int[] s_shifts =
-        {
-            7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
-            5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
-            4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
-            6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
-        };
-
         /// <summary>
         /// WARNING: this method will only work correctly on little-endian architectures.
         /// Calculates the MD5 hash of the input.
@@ -260,327 +239,455 @@ namespace PerformanceTypes
                 var c = digest->C;
                 var d = digest->D;
 
-                uint f, value;
+                uint f;
 
                 // 0 (a, b, c, d)
                 f = (c ^ d) & b ^ d;
-                value = a + f + 0xd76aa478 + blockPtr[0];
-                a = b + ((value << 7) | (value >> (32 - 7)));
+                a += f;
+                a += 0xd76aa478;
+                a += blockPtr[0];
+                a = b + ((a << 7) | (a >> (32 - 7)));
 
                 // 1 (d, a, b, c)
                 f = (b ^ c) & a ^ c;
-                value = d + f + 0xe8c7b756 + blockPtr[1];
-                d = a + ((value << 12) | (value >> (32 - 12)));
+                d += f;
+                d += 0xe8c7b756;
+                d += blockPtr[1];
+                d = a + ((d << 12) | (d >> (32 - 12)));
 
                 // 2 (c, d, a, b)
                 f = (a ^ b) & d ^ b;
-                value = c + f + 0x242070db + blockPtr[2];
-                c = d + ((value << 17) | (value >> (32 - 17)));
+                c += f;
+                c += 0x242070db;
+                c += blockPtr[2];
+                c = d + ((c << 17) | (c >> (32 - 17)));
 
                 // 3 (b, c, d, a)
                 f = (d ^ a) & c ^ a;
-                value = b + f + 0xc1bdceee + blockPtr[3];
-                b = c + ((value << 22) | (value >> (32 - 22)));
+                b += f;
+                b += 0xc1bdceee;
+                b += blockPtr[3];
+                b = c + ((b << 22) | (b >> (32 - 22)));
 
                 // 4 (a, b, c, d)
                 f = (c ^ d) & b ^ d;
-                value = a + f + 0xf57c0faf + blockPtr[4];
-                a = b + ((value << 7) | (value >> (32 - 7)));
+                a += f;
+                a += 0xf57c0faf;
+                a += blockPtr[4];
+                a = b + ((a << 7) | (a >> (32 - 7)));
 
                 // 5 (d, a, b, c)
                 f = (b ^ c) & a ^ c;
-                value = d + f + 0x4787c62a + blockPtr[5];
-                d = a + ((value << 12) | (value >> (32 - 12)));
+                d += f;
+                d += 0x4787c62a;
+                d += blockPtr[5];
+                d = a + ((d << 12) | (d >> (32 - 12)));
 
                 // 6 (c, d, a, b)
                 f = (a ^ b) & d ^ b;
-                value = c + f + 0xa8304613 + blockPtr[6];
-                c = d + ((value << 17) | (value >> (32 - 17)));
+                c += f;
+                c += 0xa8304613;
+                c += blockPtr[6];
+                c = d + ((c << 17) | (c >> (32 - 17)));
 
                 // 7 (b, c, d, a)
                 f = (d ^ a) & c ^ a;
-                value = b + f + 0xfd469501 + blockPtr[7];
-                b = c + ((value << 22) | (value >> (32 - 22)));
+                b += f;
+                b += 0xfd469501;
+                b += blockPtr[7];
+                b = c + ((b << 22) | (b >> (32 - 22)));
 
                 // 8 (a, b, c, d)
                 f = (c ^ d) & b ^ d;
-                value = a + f + 0x698098d8 + blockPtr[8];
-                a = b + ((value << 7) | (value >> (32 - 7)));
+                a += f;
+                a += 0x698098d8;
+                a += blockPtr[8];
+                a = b + ((a << 7) | (a >> (32 - 7)));
 
                 // 9 (d, a, b, c)
                 f = (b ^ c) & a ^ c;
-                value = d + f + 0x8b44f7af + blockPtr[9];
-                d = a + ((value << 12) | (value >> (32 - 12)));
+                d += f;
+                d += 0x8b44f7af;
+                d += blockPtr[9];
+                d = a + ((d << 12) | (d >> (32 - 12)));
 
                 // 10 (c, d, a, b)
                 f = (a ^ b) & d ^ b;
-                value = c + f + 0xffff5bb1 + blockPtr[10];
-                c = d + ((value << 17) | (value >> (32 - 17)));
+                c += f;
+                c += 0xffff5bb1;
+                c += blockPtr[10];
+                c = d + ((c << 17) | (c >> (32 - 17)));
 
                 // 11 (b, c, d, a)
                 f = (d ^ a) & c ^ a;
-                value = b + f + 0x895cd7be + blockPtr[11];
-                b = c + ((value << 22) | (value >> (32 - 22)));
+                b += f;
+                b += 0x895cd7be;
+                b += blockPtr[11];
+                b = c + ((b << 22) | (b >> (32 - 22)));
 
                 // 12 (a, b, c, d)
                 f = (c ^ d) & b ^ d;
-                value = a + f + 0x6b901122 + blockPtr[12];
-                a = b + ((value << 7) | (value >> (32 - 7)));
+                a += f;
+                a += 0x6b901122;
+                a += blockPtr[12];
+                a = b + ((a << 7) | (a >> (32 - 7)));
 
                 // 13 (d, a, b, c)
                 f = (b ^ c) & a ^ c;
-                value = d + f + 0xfd987193 + blockPtr[13];
-                d = a + ((value << 12) | (value >> (32 - 12)));
+                d += f;
+                d += 0xfd987193;
+                d += blockPtr[13];
+                d = a + ((d << 12) | (d >> (32 - 12)));
 
                 // 14 (c, d, a, b)
                 f = (a ^ b) & d ^ b;
-                value = c + f + 0xa679438e + blockPtr[14];
-                c = d + ((value << 17) | (value >> (32 - 17)));
+                c += f;
+                c += 0xa679438e;
+                c += blockPtr[14];
+                c = d + ((c << 17) | (c >> (32 - 17)));
 
                 // 15 (b, c, d, a)
                 f = (d ^ a) & c ^ a;
-                value = b + f + 0x49b40821 + blockPtr[15];
-                b = c + ((value << 22) | (value >> (32 - 22)));
+                b += f;
+                b += 0x49b40821;
+                b += blockPtr[15];
+                b = c + ((b << 22) | (b >> (32 - 22)));
 
                 // 16 (a, b, c, d)
                 f = (b ^ c) & d ^ c;
-                value = a + f + 0xf61e2562 + blockPtr[(5 * 16 + 1) & 0xf];
-                a = b + ((value << 5) | (value >> (32 - 5)));
+                a += f;
+                a += 0xf61e2562;
+                a += blockPtr[(5 * 16 + 1) & 0xf];
+                a = b + ((a << 5) | (a >> (32 - 5)));
 
                 // 17 (d, a, b, c)
                 f = (a ^ b) & c ^ b;
-                value = d + f + 0xc040b340 + blockPtr[(5 * 17 + 1) & 0xf];
-                d = a + ((value << 9) | (value >> (32 - 9)));
+                d += f;
+                d += 0xc040b340;
+                d += blockPtr[(5 * 17 + 1) & 0xf];
+                d = a + ((d << 9) | (d >> (32 - 9)));
 
                 // 18 (c, d, a, b)
                 f = (d ^ a) & b ^ a;
-                value = c + f + 0x265e5a51 + blockPtr[(5 * 18 + 1) & 0xf];
-                c = d + ((value << 14) | (value >> (32 - 14)));
+                c += f;
+                c += 0x265e5a51;
+                c += blockPtr[(5 * 18 + 1) & 0xf];
+                c = d + ((c << 14) | (c >> (32 - 14)));
 
                 // 19 (b, c, d, a)
                 f = (c ^ d) & a ^ d;
-                value = b + f + 0xe9b6c7aa + blockPtr[(5 * 19 + 1) & 0xf];
-                b = c + ((value << 20) | (value >> (32 - 20)));
+                b += f;
+                b += 0xe9b6c7aa;
+                b += blockPtr[(5 * 19 + 1) & 0xf];
+                b = c + ((b << 20) | (b >> (32 - 20)));
 
                 // 20 (a, b, c, d)
                 f = (b ^ c) & d ^ c;
-                value = a + f + 0xd62f105d + blockPtr[(5 * 20 + 1) & 0xf];
-                a = b + ((value << 5) | (value >> (32 - 5)));
+                a += f;
+                a += 0xd62f105d;
+                a += blockPtr[(5 * 20 + 1) & 0xf];
+                a = b + ((a << 5) | (a >> (32 - 5)));
 
                 // 21 (d, a, b, c)
                 f = (a ^ b) & c ^ b;
-                value = d + f + 0x2441453 + blockPtr[(5 * 21 + 1) & 0xf];
-                d = a + ((value << 9) | (value >> (32 - 9)));
+                d += f;
+                d += 0x2441453;
+                d += blockPtr[(5 * 21 + 1) & 0xf];
+                d = a + ((d << 9) | (d >> (32 - 9)));
 
                 // 22 (c, d, a, b)
                 f = (d ^ a) & b ^ a;
-                value = c + f + 0xd8a1e681 + blockPtr[(5 * 22 + 1) & 0xf];
-                c = d + ((value << 14) | (value >> (32 - 14)));
+                c += f;
+                c += 0xd8a1e681;
+                c += blockPtr[(5 * 22 + 1) & 0xf];
+                c = d + ((c << 14) | (c >> (32 - 14)));
 
                 // 23 (b, c, d, a)
                 f = (c ^ d) & a ^ d;
-                value = b + f + 0xe7d3fbc8 + blockPtr[(5 * 23 + 1) & 0xf];
-                b = c + ((value << 20) | (value >> (32 - 20)));
+                b += f;
+                b += 0xe7d3fbc8;
+                b += blockPtr[(5 * 23 + 1) & 0xf];
+                b = c + ((b << 20) | (b >> (32 - 20)));
 
                 // 24 (a, b, c, d)
                 f = (b ^ c) & d ^ c;
-                value = a + f + 0x21e1cde6 + blockPtr[(5 * 24 + 1) & 0xf];
-                a = b + ((value << 5) | (value >> (32 - 5)));
+                a += f;
+                a += 0x21e1cde6;
+                a += blockPtr[(5 * 24 + 1) & 0xf];
+                a = b + ((a << 5) | (a >> (32 - 5)));
 
                 // 25 (d, a, b, c)
                 f = (a ^ b) & c ^ b;
-                value = d + f + 0xc33707d6 + blockPtr[(5 * 25 + 1) & 0xf];
-                d = a + ((value << 9) | (value >> (32 - 9)));
+                d += f;
+                d += 0xc33707d6;
+                d += blockPtr[(5 * 25 + 1) & 0xf];
+                d = a + ((d << 9) | (d >> (32 - 9)));
 
                 // 26 (c, d, a, b)
                 f = (d ^ a) & b ^ a;
-                value = c + f + 0xf4d50d87 + blockPtr[(5 * 26 + 1) & 0xf];
-                c = d + ((value << 14) | (value >> (32 - 14)));
+                c += f;
+                c += 0xf4d50d87;
+                c += blockPtr[(5 * 26 + 1) & 0xf];
+                c = d + ((c << 14) | (c >> (32 - 14)));
 
                 // 27 (b, c, d, a)
                 f = (c ^ d) & a ^ d;
-                value = b + f + 0x455a14ed + blockPtr[(5 * 27 + 1) & 0xf];
-                b = c + ((value << 20) | (value >> (32 - 20)));
+                b += f;
+                b += 0x455a14ed;
+                b += blockPtr[(5 * 27 + 1) & 0xf];
+                b = c + ((b << 20) | (b >> (32 - 20)));
 
                 // 28 (a, b, c, d)
                 f = (b ^ c) & d ^ c;
-                value = a + f + 0xa9e3e905 + blockPtr[(5 * 28 + 1) & 0xf];
-                a = b + ((value << 5) | (value >> (32 - 5)));
+                a += f;
+                a += 0xa9e3e905;
+                a += blockPtr[(5 * 28 + 1) & 0xf];
+                a = b + ((a << 5) | (a >> (32 - 5)));
 
                 // 29 (d, a, b, c)
                 f = (a ^ b) & c ^ b;
-                value = d + f + 0xfcefa3f8 + blockPtr[(5 * 29 + 1) & 0xf];
-                d = a + ((value << 9) | (value >> (32 - 9)));
+                d += f;
+                d += 0xfcefa3f8;
+                d += blockPtr[(5 * 29 + 1) & 0xf];
+                d = a + ((d << 9) | (d >> (32 - 9)));
 
                 // 30 (c, d, a, b)
                 f = (d ^ a) & b ^ a;
-                value = c + f + 0x676f02d9 + blockPtr[(5 * 30 + 1) & 0xf];
-                c = d + ((value << 14) | (value >> (32 - 14)));
+                c += f;
+                c += 0x676f02d9;
+                c += blockPtr[(5 * 30 + 1) & 0xf];
+                c = d + ((c << 14) | (c >> (32 - 14)));
 
                 // 31 (b, c, d, a)
                 f = (c ^ d) & a ^ d;
-                value = b + f + 0x8d2a4c8a + blockPtr[(5 * 31 + 1) & 0xf];
-                b = c + ((value << 20) | (value >> (32 - 20)));
+                b += f;
+                b += 0x8d2a4c8a;
+                b += blockPtr[(5 * 31 + 1) & 0xf];
+                b = c + ((b << 20) | (b >> (32 - 20)));
 
                 // 32 (a, b, c, d)
                 f = b ^ c ^ d;
-                value = a + f + 0xfffa3942 + blockPtr[(3 * 32 + 5) & 0xf];
-                a = b + ((value << 4) | (value >> (32 - 4)));
+                a += f;
+                a += 0xfffa3942;
+                a += blockPtr[(3 * 32 + 5) & 0xf];
+                a = b + ((a << 4) | (a >> (32 - 4)));
 
                 // 33 (d, a, b, c)
                 f = a ^ b ^ c;
-                value = d + f + 0x8771f681 + blockPtr[(3 * 33 + 5) & 0xf];
-                d = a + ((value << 11) | (value >> (32 - 11)));
+                d += f;
+                d += 0x8771f681;
+                d += blockPtr[(3 * 33 + 5) & 0xf];
+                d = a + ((d << 11) | (d >> (32 - 11)));
 
                 // 34 (c, d, a, b)
                 f = d ^ a ^ b;
-                value = c + f + 0x6d9d6122 + blockPtr[(3 * 34 + 5) & 0xf];
-                c = d + ((value << 16) | (value >> (32 - 16)));
+                c += f;
+                c += 0x6d9d6122;
+                c += blockPtr[(3 * 34 + 5) & 0xf];
+                c = d + ((c << 16) | (c >> (32 - 16)));
 
                 // 35 (b, c, d, a)
                 f = c ^ d ^ a;
-                value = b + f + 0xfde5380c + blockPtr[(3 * 35 + 5) & 0xf];
-                b = c + ((value << 23) | (value >> (32 - 23)));
+                b += f;
+                b += 0xfde5380c;
+                b += blockPtr[(3 * 35 + 5) & 0xf];
+                b = c + ((b << 23) | (b >> (32 - 23)));
 
                 // 36 (a, b, c, d)
                 f = b ^ c ^ d;
-                value = a + f + 0xa4beea44 + blockPtr[(3 * 36 + 5) & 0xf];
-                a = b + ((value << 4) | (value >> (32 - 4)));
+                a += f;
+                a += 0xa4beea44;
+                a += blockPtr[(3 * 36 + 5) & 0xf];
+                a = b + ((a << 4) | (a >> (32 - 4)));
 
                 // 37 (d, a, b, c)
                 f = a ^ b ^ c;
-                value = d + f + 0x4bdecfa9 + blockPtr[(3 * 37 + 5) & 0xf];
-                d = a + ((value << 11) | (value >> (32 - 11)));
+                d += f;
+                d += 0x4bdecfa9;
+                d += blockPtr[(3 * 37 + 5) & 0xf];
+                d = a + ((d << 11) | (d >> (32 - 11)));
 
                 // 38 (c, d, a, b)
                 f = d ^ a ^ b;
-                value = c + f + 0xf6bb4b60 + blockPtr[(3 * 38 + 5) & 0xf];
-                c = d + ((value << 16) | (value >> (32 - 16)));
+                c += f;
+                c += 0xf6bb4b60;
+                c += blockPtr[(3 * 38 + 5) & 0xf];
+                c = d + ((c << 16) | (c >> (32 - 16)));
 
                 // 39 (b, c, d, a)
                 f = c ^ d ^ a;
-                value = b + f + 0xbebfbc70 + blockPtr[(3 * 39 + 5) & 0xf];
-                b = c + ((value << 23) | (value >> (32 - 23)));
+                b += f;
+                b += 0xbebfbc70;
+                b += blockPtr[(3 * 39 + 5) & 0xf];
+                b = c + ((b << 23) | (b >> (32 - 23)));
 
                 // 40 (a, b, c, d)
                 f = b ^ c ^ d;
-                value = a + f + 0x289b7ec6 + blockPtr[(3 * 40 + 5) & 0xf];
-                a = b + ((value << 4) | (value >> (32 - 4)));
+                a += f;
+                a += 0x289b7ec6;
+                a += blockPtr[(3 * 40 + 5) & 0xf];
+                a = b + ((a << 4) | (a >> (32 - 4)));
 
                 // 41 (d, a, b, c)
                 f = a ^ b ^ c;
-                value = d + f + 0xeaa127fa + blockPtr[(3 * 41 + 5) & 0xf];
-                d = a + ((value << 11) | (value >> (32 - 11)));
+                d += f;
+                d += 0xeaa127fa;
+                d += blockPtr[(3 * 41 + 5) & 0xf];
+                d = a + ((d << 11) | (d >> (32 - 11)));
 
                 // 42 (c, d, a, b)
                 f = d ^ a ^ b;
-                value = c + f + 0xd4ef3085 + blockPtr[(3 * 42 + 5) & 0xf];
-                c = d + ((value << 16) | (value >> (32 - 16)));
+                c += f;
+                c += 0xd4ef3085;
+                c += blockPtr[(3 * 42 + 5) & 0xf];
+                c = d + ((c << 16) | (c >> (32 - 16)));
 
                 // 43 (b, c, d, a)
                 f = c ^ d ^ a;
-                value = b + f + 0x4881d05 + blockPtr[(3 * 43 + 5) & 0xf];
-                b = c + ((value << 23) | (value >> (32 - 23)));
+                b += f;
+                b += 0x4881d05;
+                b += blockPtr[(3 * 43 + 5) & 0xf];
+                b = c + ((b << 23) | (b >> (32 - 23)));
 
                 // 44 (a, b, c, d)
                 f = b ^ c ^ d;
-                value = a + f + 0xd9d4d039 + blockPtr[(3 * 44 + 5) & 0xf];
-                a = b + ((value << 4) | (value >> (32 - 4)));
+                a += f;
+                a += 0xd9d4d039;
+                a += blockPtr[(3 * 44 + 5) & 0xf];
+                a = b + ((a << 4) | (a >> (32 - 4)));
 
                 // 45 (d, a, b, c)
                 f = a ^ b ^ c;
-                value = d + f + 0xe6db99e5 + blockPtr[(3 * 45 + 5) & 0xf];
-                d = a + ((value << 11) | (value >> (32 - 11)));
+                d += f;
+                d += 0xe6db99e5;
+                d += blockPtr[(3 * 45 + 5) & 0xf];
+                d = a + ((d << 11) | (d >> (32 - 11)));
 
                 // 46 (c, d, a, b)
                 f = d ^ a ^ b;
-                value = c + f + 0x1fa27cf8 + blockPtr[(3 * 46 + 5) & 0xf];
-                c = d + ((value << 16) | (value >> (32 - 16)));
+                c += f;
+                c += 0x1fa27cf8;
+                c += blockPtr[(3 * 46 + 5) & 0xf];
+                c = d + ((c << 16) | (c >> (32 - 16)));
 
                 // 47 (b, c, d, a)
                 f = c ^ d ^ a;
-                value = b + f + 0xc4ac5665 + blockPtr[(3 * 47 + 5) & 0xf];
-                b = c + ((value << 23) | (value >> (32 - 23)));
+                b += f;
+                b += 0xc4ac5665;
+                b += blockPtr[(3 * 47 + 5) & 0xf];
+                b = c + ((b << 23) | (b >> (32 - 23)));
 
                 // 48 (a, b, c, d)
                 f = c ^ (b | ~d);
-                value = a + f + 0xf4292244 + blockPtr[(7 * 48) & 0xf];
-                a = b + ((value << 6) | (value >> (32 - 6)));
+                a += f;
+                a += 0xf4292244;
+                a += blockPtr[(7 * 48) & 0xf];
+                a = b + ((a << 6) | (a >> (32 - 6)));
 
                 // 49 (d, a, b, c)
                 f = b ^ (a | ~c);
-                value = d + f + 0x432aff97 + blockPtr[(7 * 49) & 0xf];
-                d = a + ((value << 10) | (value >> (32 - 10)));
+                d += f;
+                d += 0x432aff97;
+                d += blockPtr[(7 * 49) & 0xf];
+                d = a + ((d << 10) | (d >> (32 - 10)));
 
                 // 50 (c, d, a, b)
                 f = a ^ (d | ~b);
-                value = c + f + 0xab9423a7 + blockPtr[(7 * 50) & 0xf];
-                c = d + ((value << 15) | (value >> (32 - 15)));
+                c += f;
+                c += 0xab9423a7;
+                c += blockPtr[(7 * 50) & 0xf];
+                c = d + ((c << 15) | (c >> (32 - 15)));
 
                 // 51 (b, c, d, a)
                 f = d ^ (c | ~a);
-                value = b + f + 0xfc93a039 + blockPtr[(7 * 51) & 0xf];
-                b = c + ((value << 21) | (value >> (32 - 21)));
+                b += f;
+                b += 0xfc93a039;
+                b += blockPtr[(7 * 51) & 0xf];
+                b = c + ((b << 21) | (b >> (32 - 21)));
 
                 // 52 (a, b, c, d)
                 f = c ^ (b | ~d);
-                value = a + f + 0x655b59c3 + blockPtr[(7 * 52) & 0xf];
-                a = b + ((value << 6) | (value >> (32 - 6)));
+                a += f;
+                a += 0x655b59c3;
+                a += blockPtr[(7 * 52) & 0xf];
+                a = b + ((a << 6) | (a >> (32 - 6)));
 
                 // 53 (d, a, b, c)
                 f = b ^ (a | ~c);
-                value = d + f + 0x8f0ccc92 + blockPtr[(7 * 53) & 0xf];
-                d = a + ((value << 10) | (value >> (32 - 10)));
+                d += f;
+                d += 0x8f0ccc92;
+                d += blockPtr[(7 * 53) & 0xf];
+                d = a + ((d << 10) | (d >> (32 - 10)));
 
                 // 54 (c, d, a, b)
                 f = a ^ (d | ~b);
-                value = c + f + 0xffeff47d + blockPtr[(7 * 54) & 0xf];
-                c = d + ((value << 15) | (value >> (32 - 15)));
+                c += f;
+                c += 0xffeff47d;
+                c += blockPtr[(7 * 54) & 0xf];
+                c = d + ((c << 15) | (c >> (32 - 15)));
 
                 // 55 (b, c, d, a)
                 f = d ^ (c | ~a);
-                value = b + f + 0x85845dd1 + blockPtr[(7 * 55) & 0xf];
-                b = c + ((value << 21) | (value >> (32 - 21)));
+                b += f;
+                b += 0x85845dd1;
+                b += blockPtr[(7 * 55) & 0xf];
+                b = c + ((b << 21) | (b >> (32 - 21)));
 
                 // 56 (a, b, c, d)
                 f = c ^ (b | ~d);
-                value = a + f + 0x6fa87e4f + blockPtr[(7 * 56) & 0xf];
-                a = b + ((value << 6) | (value >> (32 - 6)));
+                a += f;
+                a += 0x6fa87e4f;
+                a += blockPtr[(7 * 56) & 0xf];
+                a = b + ((a << 6) | (a >> (32 - 6)));
 
                 // 57 (d, a, b, c)
                 f = b ^ (a | ~c);
-                value = d + f + 0xfe2ce6e0 + blockPtr[(7 * 57) & 0xf];
-                d = a + ((value << 10) | (value >> (32 - 10)));
+                d += f;
+                d += 0xfe2ce6e0;
+                d += blockPtr[(7 * 57) & 0xf];
+                d = a + ((d << 10) | (d >> (32 - 10)));
 
                 // 58 (c, d, a, b)
                 f = a ^ (d | ~b);
-                value = c + f + 0xa3014314 + blockPtr[(7 * 58) & 0xf];
-                c = d + ((value << 15) | (value >> (32 - 15)));
+                c += f;
+                c += 0xa3014314;
+                c += blockPtr[(7 * 58) & 0xf];
+                c = d + ((c << 15) | (c >> (32 - 15)));
 
                 // 59 (b, c, d, a)
                 f = d ^ (c | ~a);
-                value = b + f + 0x4e0811a1 + blockPtr[(7 * 59) & 0xf];
-                b = c + ((value << 21) | (value >> (32 - 21)));
+                b += f;
+                b += 0x4e0811a1;
+                b += blockPtr[(7 * 59) & 0xf];
+                b = c + ((b << 21) | (b >> (32 - 21)));
 
                 // 60 (a, b, c, d)
                 f = c ^ (b | ~d);
-                value = a + f + 0xf7537e82 + blockPtr[(7 * 60) & 0xf];
-                a = b + ((value << 6) | (value >> (32 - 6)));
+                a += f;
+                a += 0xf7537e82;
+                a += blockPtr[(7 * 60) & 0xf];
+                a = b + ((a << 6) | (a >> (32 - 6)));
 
                 // 61 (d, a, b, c)
                 f = b ^ (a | ~c);
-                value = d + f + 0xbd3af235 + blockPtr[(7 * 61) & 0xf];
-                d = a + ((value << 10) | (value >> (32 - 10)));
+                d += f;
+                d += 0xbd3af235;
+                d += blockPtr[(7 * 61) & 0xf];
+                d = a + ((d << 10) | (d >> (32 - 10)));
 
                 // 62 (c, d, a, b)
                 f = a ^ (d | ~b);
-                value = c + f + 0x2ad7d2bb + blockPtr[(7 * 62) & 0xf];
-                c = d + ((value << 15) | (value >> (32 - 15)));
+                c += f;
+                c += 0x2ad7d2bb;
+                c += blockPtr[(7 * 62) & 0xf];
+                c = d + ((c << 15) | (c >> (32 - 15)));
 
                 // 63 (b, c, d, a)
                 f = d ^ (c | ~a);
-                value = b + f + 0xeb86d391 + blockPtr[(7 * 63) & 0xf];
-                b = c + ((value << 21) | (value >> (32 - 21)));
+                b += f;
+                b += 0xeb86d391;
+                b += blockPtr[(7 * 63) & 0xf];
+                b = c + ((b << 21) | (b >> (32 - 21)));
 
                 digest->A += a;
                 digest->B += b;
