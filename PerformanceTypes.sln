@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.25428.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceTypes", "PerformanceTypes\PerformanceTypes.csproj", "{9EB7644F-BED8-4C58-9874-29675548950C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerformanceTypes", "PerformanceTypes\PerformanceTypes.csproj", "{9EB7644F-BED8-4C58-9874-29675548950C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceTypes.Tests", "PerformanceTypes.Tests\PerformanceTypes.Tests.csproj", "{99761C8C-FD92-4047-82BC-BDD5B7E40135}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerformanceTypes.Tests", "PerformanceTypes.Tests\PerformanceTypes.Tests.csproj", "{99761C8C-FD92-4047-82BC-BDD5B7E40135}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{14A12A26-4D7F-441C-9621-6FF9769F169D}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
+		build.cmd = build.cmd
+		build.ps1 = build.ps1
 	EndProjectSection
 EndProject
 Global
@@ -29,5 +31,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {55F6EE79-1552-427A-BC31-115525A591A3}
 	EndGlobalSection
 EndGlobal
