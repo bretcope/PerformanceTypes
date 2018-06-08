@@ -26,7 +26,7 @@ assembly_info:
 
 install:
   - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
-  - ps: build.ps1
+  - ps: .\build.ps1
 
 #---------------------------------#
 #       build configuration       #
