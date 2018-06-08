@@ -96,7 +96,7 @@ function ExecuteDotNet([string] $project, [string] $cmd, [string] $version)
 
     if ($AppVeyor)
     {
-        $dotnetArgs += "/l:`"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll`""
+        # $dotnetArgs += "/l:`"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll`""
     }
 
     $dotnetArgs += "-v=$Verbosity"
