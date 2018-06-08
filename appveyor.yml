@@ -4,57 +4,32 @@
 #      general configuration      #
 #---------------------------------#
 
-environment:
-  NUGET_RELEASE_VERSION: 2.0.2
-  NUGET_FILE: PerformanceTypes\PerformanceTypes.nuspec
-  ASSEMBLY_FILE: PerformanceTypes\Properties\AssemblyInfo.cs
-
-version: $(NUGET_RELEASE_VERSION).{build}
 
 #---------------------------------#
 #    environment configuration    #
 #---------------------------------#
 
-os: Visual Studio 2015
-
-assembly_info:
-  patch: true
-  file: $(ASSEMBLY_FILE)
-  assembly_version: $(MAJOR_VERSION)
-  assembly_file_version: $(appveyor_build_version)
-  assembly_informational_version: $(NUGET_VERSION)
-
-install:
-  - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
-  - ps: .\build.ps1
+os: Visual Studio 2017
 
 #---------------------------------#
 #       build configuration       #
 #---------------------------------#
 
-platform: Any CPU
-
-configuration: Release
-
-build:
-  project: PerformanceTypes.sln
-  publish_nuget: true
-  publish_nuget_symbols: true
-  verbosity: normal
+build_script:
+  - ps: .\build.ps1 -pack
 
 #---------------------------------#
 #       tests configuration       #
 #---------------------------------#
 
-test:
-  assemblies:
-    - '**\*.Tests.dll'
+test: off
 
 #---------------------------------#
 #      artifacts configuration    #
 #---------------------------------#
 
-
+artifacts:
+  - path: artifacts/*
 
 #---------------------------------#
 #     deployment configuration    #
