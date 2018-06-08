@@ -84,9 +84,11 @@ function ExecuteDotNet([string] $project, [string] $cmd, [string] $version)
             $dotnetArgs += "--no-restore"
         }
         "test" {
-            $dotnetArgs += "--no-build"
+            $dotnetArgs += "-c=$Configuration"
+            $dotnetArgs += "--no-restore"
         }
         "pack" {
+            $dotnetArgs += "-c=$Configuration"
             $dotnetArgs += "--no-restore"
             $dotnetArgs += "/p:IncludeSymbols=true"
             $dotnetArgs += "/p:PackageVersion=$version"
