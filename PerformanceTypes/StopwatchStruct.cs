@@ -137,7 +137,6 @@ namespace PerformanceTypes
         /// <param name="value">The current high-resolution time value in ticks.</param>
         /// <returns>True if the call succeeded.</returns>
         [DllImport("kernel32.dll")]
-        [ResourceExposure(ResourceScope.None)]
         public static extern bool QueryPerformanceCounter(out long value);
 
         /// <summary>
@@ -147,7 +146,6 @@ namespace PerformanceTypes
         /// <param name="value">The number of ticks </param>
         /// <returns>True if the call succeeded.</returns>
         [DllImport("kernel32.dll")]
-        [ResourceExposure(ResourceScope.None)]
         public static extern bool QueryPerformanceFrequency(out long value);
     }
 }
