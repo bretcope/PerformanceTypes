@@ -179,7 +179,7 @@ function GeneratePrereleaseVersion ([System.Text.RegularExpressions.GroupCollect
     else
     {
         $patch = [int]::Parse($versionGroups["Patch"]) + 1
-        $version += "$patch-unStable"
+        $version += "$patch-unstable"
     }
 
     $version += "-$buildNum"
