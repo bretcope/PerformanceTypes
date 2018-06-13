@@ -10,7 +10,7 @@
     <RepositoryUrl>https://github.com/bretcope/PerformanceTypes.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Performance Allocations Stopwatch</PackageTags>
-    <PackageVersion>2.0.2</PackageVersion>
+    <PackageVersion>2.1.0</PackageVersion>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
